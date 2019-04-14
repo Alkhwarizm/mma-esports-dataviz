@@ -1,0 +1,26 @@
+{
+  "name": "mma-esports-dataviz",
+  "version": "1.0.0",
+  "description": "Simple data visualization for IF4061 class assignment",
+  "main": "index.js",
+  "directories": {
+    "doc": "docs"
+  },
+  "scripts": {
+    "dev": "nuxt",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Alkhwarizm/mma-esports-dataviz.git"
+  },
+  "author": "Alkhwarizm",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/Alkhwarizm/mma-esports-dataviz/issues"
+  },
+  "homepage": "https://alkhwarizm.github.io/mma-esports-dataviz/",
+  "dependencies": {
+    "nuxt": "^2.6.1"
+  }
+}

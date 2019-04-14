@@ -14,7 +14,7 @@
           target="_blank"
           class="button button-grey"
         >GitHub</a>
-        <router-link to="dashboard" class="button button-red">
+        <router-link to="/dashboard" class="button button-red">
           Start
         </router-link>
       </div>

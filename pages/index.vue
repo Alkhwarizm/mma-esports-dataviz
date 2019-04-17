@@ -2,10 +2,10 @@
   <section class="container">
     <div>
       <logo />
-      <h1 class="title text-grey-darkest">
-        eSports Dashboard
+      <h1 class="title text-white">
+        ESPORTS DASHBOARD
       </h1>
-      <h2 class="subtitle text-grey-dark">
+      <h2 class="subtitle text-tertiary">
         A simple data visualization project for IF4061 class assignment
       </h2>
       <div class="links">
@@ -14,7 +14,7 @@
           target="_blank"
           class="button button-grey"
         >GitHub</a>
-        <router-link to="dashboard" class="button button-red" append>
+        <router-link :to="{ path: '/dashboard' }" class="button button-red" append>
           Start
         </router-link>
       </div>
@@ -47,7 +47,7 @@ a.button {
 }
 
 .button-grey {
-  @apply text-grey-darkest border-grey-darkest;
+  @apply text-white border-white;
 }
 
 .button-grey:hover {
@@ -55,11 +55,11 @@ a.button {
 }
 
 .button-red {
-  @apply text-red-dark border-red-dark;
+  @apply text-secondary border-secondary;
 }
 
 .button-red:hover {
-  @apply bg-red text-white border-transparent;
+  @apply bg-secondary text-primary border-transparent;
 }
 
 .container {
@@ -72,13 +72,13 @@ a.button {
 }
 
 .title {
-  font-family: 'Quicksand', 'Source Sans Pro', -apple-system, BlinkMacSystemFont,
+  font-family: 'Raleway', 'Quicksand', 'Source Sans Pro', -apple-system, BlinkMacSystemFont,
     'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
   display: block;
-  font-weight: 300;
   font-size: 100px;
   /* color: #35495e; */
   letter-spacing: 1px;
+  @apply font-sans font-hairline;
 }
 
 .subtitle {

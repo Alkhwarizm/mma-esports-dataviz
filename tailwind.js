@@ -44,6 +44,10 @@ View the full documentation at https://tailwindcss.com.
 const colors = {
   'transparent': 'transparent',
 
+  'primary': '#001A2C',
+  'secondary': '#64DDDC',
+  'tertiary': '#1f9d55',
+
   'black': '#22292f',
   'grey-darkest': '#3d4852',
   'grey-darker': '#606f7b',
@@ -190,18 +194,19 @@ module.exports = {
 
   fonts: {
     'sans': [
+      'Raleway',
+      'Roboto',
       'system-ui',
       'BlinkMacSystemFont',
       '-apple-system',
       'Segoe UI',
-      'Roboto',
       'Oxygen',
       'Ubuntu',
       'Cantarell',
       'Fira Sans',
       'Droid Sans',
       'Helvetica Neue',
-      'sans-serif'
+      'sans-serif',
     ],
     'serif': [
       'Constantia',

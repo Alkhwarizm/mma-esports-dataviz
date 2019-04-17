@@ -29,7 +29,7 @@
 .Triangle--one {
   border-left: 105px solid transparent;
   border-right: 105px solid transparent;
-  border-bottom: 180px solid #E3342F;
+  border-bottom: 180px solid #1f9d55;
 }
 
 .Triangle--two {
@@ -38,7 +38,7 @@
   animation: goright 0.5s linear forwards 3.5s;
   border-left: 87.5px solid transparent;
   border-right: 87.5px solid transparent;
-  border-bottom: 150px solid #CC1F1A;
+  border-bottom: 150px solid #1f9d55;
 }
 
 .Triangle--three {
@@ -47,7 +47,7 @@
   animation: goright 0.5s linear forwards 3.5s;
   border-left: 70px solid transparent;
   border-right: 70px solid transparent;
-  border-bottom: 120px solid #3B0D0C;
+  border-bottom: 120px solid #64DDDC;
 }
 
 .Triangle--four {
@@ -56,7 +56,7 @@
   animation: godown 0.5s linear forwards 3s;
   border-left: 35px solid transparent;
   border-right: 35px solid transparent;
-  border-bottom: 60px solid #fff;
+  border-bottom: 60px solid #001A2C;
 }
 
 @keyframes turn {

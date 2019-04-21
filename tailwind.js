@@ -194,6 +194,8 @@ module.exports = {
 
   fonts: {
     'sans': [
+      'Orbitron',
+      'Exo 2',
       'Raleway',
       'Roboto',
       'system-ui',
@@ -203,9 +205,6 @@ module.exports = {
       'Oxygen',
       'Ubuntu',
       'Cantarell',
-      'Fira Sans',
-      'Droid Sans',
-      'Helvetica Neue',
       'sans-serif',
     ],
     'serif': [

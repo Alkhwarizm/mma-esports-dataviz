@@ -35,39 +35,68 @@ const world = require('../static/topojson/countries.json')
 const tw = require('../tailwind.js')
 const countries = new Map(world.objects.units.geometries.map(d => [d.properties.iso3, d.properties.name]))
 
+function parseNumber(input) {
+  const str = input.match(/[0-9]+/g)[0];
+  return Number.parseInt(str);
+}
+
 export default {
   data() {
     return {
       countries,
-      // height: d3.select('#map').attr('width')/2
     }
   },
   computed: {
     width: function () {
-      return d3.select('#map').style('width');
+      return parseNumber(d3.select('#map').style('width'));
+    },
+    height: function() {
+      return parseNumber(d3.select('#map').style('width'))/2;
     }
   },
   mounted() {
-    // const projection = d3.geoEquirectangular()
-    //   .scale(150)
-    //   .translate([960/2, 600/2+90])
+    const projection = d3.geoEquirectangular()
+      .scale(140)
+      .translate([this.width/2, this.height/2])
 
-    // const path = d3.geoPath(projection);
+    const path = d3.geoPath(projection);
 
-    // const svg = d3.select('#map')
-    //   .append('svg')
-    //     .attr('viewBox', '0 0 960 600')
-    //     .style('width', '100%')
-    //     .style('height', 'auto')
-    //   .append('g')
-    //     .selectAll('path')
-    //     .data(topojson.feature(world, world.objects.units).features)
-    //     .join('path')
-    //       .attr('fill', tw.colors.tertiary)
-    //       .attr('stroke', tw.colors.secondary)
-    //       .attr('d', path)
-    //     .append('title')
-    //       .text(d => `${d.properties.name}`)
+    const svg = d3.select('#map')
+      .append('svg')
+        .attr('class', 'map')
+        .attr('viewBox', `0 0 ${this.width} ${this.height}`)
+        .style('width', '100%')
+        .style('height', 'auto');
+
+    const view = svg.append('rect')
+      .attr('class', 'view')
+      .attr('x', 0.5)
+      .attr('y', 0.5)
+      .attr('width', this.width - 1)
+      .attr('height', this.height - 1)
+      .attr('fill', tw.colors.primary);
+
+    const worldMap = svg.append('g')
+      .selectAll('path')
+      .data(topojson.feature(world, world.objects.units).features)
+      .join('path')
+        .attr('fill', tw.colors.tertiary)
+        .attr('stroke', tw.colors.primary)
+        .attr('d', path);
+
+    const tooltip = worldMap.append('title')
+      .text(d => `${d.properties.name}`);
+
+    const zoomed = () => {
+      worldMap.attr("transform", d3.event.transform);
+    }
+
+    const zoom = d3.zoom()
+      .scaleExtent([1, 20])
+      .translateExtent([[0, 0], [this.width, this.height]])
+      .on('zoom', zoomed);
+
+    svg.call(zoom)
         
   }
 }
@@ -96,6 +125,6 @@ export default {
 }
 
 .grid {
-  @apply border border-2 border-secondary pt-3 pl-3 pb-2;
+  @apply border border-2 border-secondary pt-3 pl-3 pb-2 pr-3;
 }
 </style>

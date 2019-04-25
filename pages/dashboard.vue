@@ -1,7 +1,7 @@
 <template>
   <section class="container">
     <div class="row">
-      <div class="grid w-full bg-primary">
+      <div class="grid padded w-full">
         <h4 class="subtitle">
           DASHBOARD
         </h4>
@@ -11,8 +11,26 @@
       </div>
     </div>
     <div class="row">
-      <div class="grid w-1/4 bg-primary">1</div>
-      <div id="map" class="grid w-3/4 bg-primary">
+      <div class="grid w-1/4">
+        <div class="border border-secondary border-b-2 padded w-full h-half">
+          <h4 id="country-name" class="subtitle mt-2 ml-2">COUNTRY NAME</h4>
+          <br>
+          <h5 class="kv">KEY 1</h5>
+          <svg class="ml-2 mb-2" width="90%" height="10px">
+            <rect y="2px" width="100%" height="3px" fill="grey"></rect>
+            <rect width="100%" height="6px" fill="white"></rect>
+          </svg>
+          <h5 class="kv">KEY 2</h5>
+          <svg class="ml-2 mb-2" width="90%" height="10px">
+            <rect y="2px" width="100%" height="3px" fill="grey"></rect>
+            <rect width="50%" height="6px" fill="white"></rect>
+          </svg>
+        </div>
+        <div class="border border-secondary border-t-2 padded w-full h-half">
+          <h4 class="subtitle mt-2 ml-2">OTHER DATA?</h4>
+        </div>
+      </div>
+      <div id="map" class="grid padded w-3/4">
         <h5 class="subtitle">
           CHOROPLETH
         </h5>
@@ -22,8 +40,8 @@
       </div>
     </div>
     <div class="row">
-      <div class="grid w-1/4 bg-primary">3</div>
-      <div class="grid w-3/4 bg-primary">4</div>
+      <div class="grid padded w-1/4 h-full">3</div>
+      <div class="grid padded w-3/4 h-full">4</div>
     </div>
   </section>
 </template>
@@ -38,6 +56,14 @@ const countries = new Map(world.objects.units.geometries.map(d => [d.properties.
 function parseNumber(input) {
   const str = input.match(/[0-9]+/g)[0];
   return Number.parseInt(str);
+}
+
+function handleMouseOver(d, i) {
+  d3.select('#country-name').text(d.properties.name.toUpperCase());
+} 
+
+function handleMouseOut(d, i) {
+  d3.select('#country-name').text('COUNTRY NAME');
 }
 
 export default {
@@ -74,7 +100,8 @@ export default {
       .attr('y', 0.5)
       .attr('width', this.width - 1)
       .attr('height', this.height - 1)
-      .attr('fill', tw.colors.primary);
+      .attr('fill', tw.colors.secondary)
+      .style('opacity', 0.1)
 
     const worldMap = svg.append('g')
       .selectAll('path')
@@ -82,7 +109,9 @@ export default {
       .join('path')
         .attr('fill', tw.colors.tertiary)
         .attr('stroke', tw.colors.primary)
-        .attr('d', path);
+        .attr('d', path)
+        .on("mouseover", handleMouseOver)
+        .on("mouseout", handleMouseOut);
 
     const tooltip = worldMap.append('title')
       .text(d => `${d.properties.name}`);
@@ -125,6 +154,16 @@ export default {
 }
 
 .grid {
-  @apply border border-2 border-secondary pt-3 pl-3 pb-2 pr-3;
+  @apply border border-2 border-secondary bg-primary;
+}
+
+.padded {
+  @apply pt-3 pl-3 pb-2 pr-3;
+}
+
+.kv {
+  font-family: Orbitron;
+  letter-spacing: 1pt;
+  @apply text-white text-left mt-1 ml-2;
 }
 </style>

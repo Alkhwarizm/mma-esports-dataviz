@@ -15,7 +15,15 @@
         <div class="border border-secondary border-b-2 padded w-full h-half">
           <h4 id="country-name" class="subtitle mt-2 ml-2">COUNTRY NAME</h4>
           <br>
-          <h5 class="kv">KEY 1</h5>
+          <div class="country-info">
+            <!-- <div v-for="(value, key) in currentCountry" :key="key">
+              <h5 class="kv">{key}:   {value}</h5>
+              <svg class="ml-2 mb-2" width="90%" height="10px">
+                <rect y="2px" width="100%" height="3px" fill="grey"></rect>
+                <rect :width="`${value/100}%`" height="6px" fill="white"></rect>
+              </svg> -->
+          </div>
+          <!-- <h5 class="kv">KEY 1</h5>
           <svg class="ml-2 mb-2" width="90%" height="10px">
             <rect y="2px" width="100%" height="3px" fill="grey"></rect>
             <rect width="100%" height="6px" fill="white"></rect>
@@ -24,7 +32,7 @@
           <svg class="ml-2 mb-2" width="90%" height="10px">
             <rect y="2px" width="100%" height="3px" fill="grey"></rect>
             <rect width="50%" height="6px" fill="white"></rect>
-          </svg>
+          </svg> -->
         </div>
         <div class="border border-secondary border-t-2 padded w-full h-half">
           <h4 class="subtitle mt-2 ml-2">OTHER DATA?</h4>
@@ -51,25 +59,27 @@ const d3 = require('d3')
 const topojson = require('topojson-client')
 const world = require('../static/topojson/countries.json')
 const tw = require('../tailwind.js')
-const countries = new Map(world.objects.units.geometries.map(d => [d.properties.iso3, d.properties.name]))
+
+const countries = topojson.feature(world, world.objects.units).features.map((c) => {
+  const data = {
+    player: Math.floor(d3.randomUniform(100, 1000)()),
+    money: Math.floor(d3.randomUniform(1000, 10000)()),
+  }
+  c.properties.data = data;
+  return c;
+})
+
 
 function parseNumber(input) {
   const str = input.match(/[0-9]+/g)[0];
   return Number.parseInt(str);
 }
 
-function handleMouseOver(d, i) {
-  d3.select('#country-name').text(d.properties.name.toUpperCase());
-} 
-
-function handleMouseOut(d, i) {
-  d3.select('#country-name').text('COUNTRY NAME');
-}
-
 export default {
   data() {
     return {
       countries,
+      currentCountry: {},
     }
   },
   computed: {
@@ -78,6 +88,40 @@ export default {
     },
     height: function() {
       return parseNumber(d3.select('#map').style('width'))/2;
+    }
+  },
+  methods: {
+    handleMouseOver: (d, i) => {
+      const countryData = d.properties.data;
+      const countryInfo = d3.select('.country-info');
+      countryInfo.html('');
+      Object.getOwnPropertyNames(countryData).forEach((key) => {
+        countryInfo
+          .append('h5')
+            .classed('kv', true)
+            .text(`${key}:  ${countryData[key]}`);
+        countryInfo
+          .append('svg')
+            .attr('class', 'ml-2, mb-2')
+            .attr('width', '90%')
+            .attr('height', '10px')
+            .append('rect')
+              .attr('width', '100%')
+              .attr('height', '3px')
+              .attr('fill', 'grey')
+              .attr('y', '2px')
+            .clone()
+              .attr('width', `${countryData[key]/100}%`)
+              .attr('height', '6px')
+              .attr('fill', 'white')
+              .attr('y', '0px')
+      })
+      d3.select('#country-name').text(d.properties.name.toUpperCase());
+    },
+    handleMouseOut: (d, i) => {
+      const countryInfo = d3.select('.country-info');
+      // countryInfo.html('');
+      d3.select('#country-name').text('COUNTRY INFO');
     }
   },
   mounted() {
@@ -105,13 +149,13 @@ export default {
 
     const worldMap = svg.append('g')
       .selectAll('path')
-      .data(topojson.feature(world, world.objects.units).features)
+      .data(this.countries)
       .join('path')
         .attr('fill', tw.colors.tertiary)
         .attr('stroke', tw.colors.primary)
         .attr('d', path)
-        .on("mouseover", handleMouseOver)
-        .on("mouseout", handleMouseOut);
+        .on("mouseover", this.handleMouseOver)
+        .on("mouseout", this.handleMouseOut);
 
     const tooltip = worldMap.append('title')
       .text(d => `${d.properties.name}`);
@@ -131,7 +175,7 @@ export default {
 }
 </script>
 
-<style scoped>
+<style>
 .container {
   @apply border border-2 border-secondary;
   @apply min-h-screen justify-center items-center mx-auto;
@@ -164,6 +208,6 @@ export default {
 .kv {
   font-family: Orbitron;
   letter-spacing: 1pt;
-  @apply text-white text-left mt-1 ml-2;
+  @apply text-white mt-1 ml-2;
 }
 </style>

@@ -30,6 +30,9 @@
           WORLD MAP
         </h3>
         <div class="map w-full" ref="map"></div>
+        <div class="slider w-full">
+
+        </div>
       </div>
     </div>
     <div class="row"></div>

@@ -45,7 +45,6 @@ export default {
   modules: [
     // Doc: https://axios.nuxtjs.org/usage
     '@nuxtjs/axios',
-    'nuxt-leaflet'
   ],
   /*
   ** Axios module configuration

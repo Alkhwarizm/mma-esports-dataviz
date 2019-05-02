@@ -37,10 +37,15 @@
 </template>
 
 <script>
+const topojson = require('topojson-client');
+const world = require('../static/topojson/countries.json');
+
+const countries = topojson.feature(world, world.objects.units).features
 
 export default {
   data() {
     return {
+      countries
     }
   },
   methods: {
@@ -69,6 +74,36 @@ export default {
     },
     drawMap: function () {
       this.drawViewPort('map');
+
+      const projection = this.$d3.geoEquirectangular()
+        .scale(100)
+        .translate([this.mapView.attr('width')/2, this.mapView.attr('height')/2])
+
+      const path = this.$d3.geoPath(projection);
+
+      const worldMap = this.mapSvg.append('g')
+        .selectAll('path')
+        .data(this.countries)
+        .join('path')
+          .attr('fill', this.$tw.colors.tertiary)
+          .attr('stroke', this.$tw.colors.primary)
+          .attr('d', path)
+          // .on("mouseover", this.handleMouseOver)
+          // .on("mouseout", this.handleMouseOut);
+
+      const tooltip = worldMap.append('title')
+        .text(d => `${d.properties.name}`);
+
+      const zoomed = () => {
+        worldMap.attr("transform", this.$d3.event.transform);
+      }
+
+      const zoom = this.$d3.zoom()
+        .scaleExtent([1, 20])
+        .translateExtent([[0, 0], [this.mapView.attr('width'), this.mapView.attr('height')]])
+        .on('zoom', zoomed);
+
+      this.mapSvg.call(zoom);
       // const mapWidth = this.$refs.map.clientWidth;
       // const mapHeight = mapWidth/2;
       

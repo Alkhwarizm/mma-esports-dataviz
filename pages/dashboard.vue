@@ -23,16 +23,6 @@
                 <rect :width="`${value/100}%`" height="6px" fill="white"></rect>
               </svg> -->
           </div>
-          <!-- <h5 class="kv">KEY 1</h5>
-          <svg class="ml-2 mb-2" width="90%" height="10px">
-            <rect y="2px" width="100%" height="3px" fill="grey"></rect>
-            <rect width="100%" height="6px" fill="white"></rect>
-          </svg>
-          <h5 class="kv">KEY 2</h5>
-          <svg class="ml-2 mb-2" width="90%" height="10px">
-            <rect y="2px" width="100%" height="3px" fill="grey"></rect>
-            <rect width="50%" height="6px" fill="white"></rect>
-          </svg> -->
         </div>
         <div class="border border-secondary border-t-2 padded w-full h-half">
           <h4 class="subtitle mt-2 ml-2">OTHER DATA?</h4>
@@ -99,10 +89,10 @@ export default {
         countryInfo
           .append('h5')
             .classed('kv', true)
-            .text(`${key}:  ${countryData[key]}`);
+            .text(`${key.toUpperCase()}:  ${countryData[key]}`);
         countryInfo
           .append('svg')
-            .attr('class', 'ml-2, mb-2')
+            .attr('class', 'kv')
             .attr('width', '90%')
             .attr('height', '10px')
             .append('rect')

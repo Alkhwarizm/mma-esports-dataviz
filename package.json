@@ -16,11 +16,8 @@
     "@nuxtjs/axios": "^5.3.6",
     "cross-env": "^5.2.0",
     "d3": "^5.9.2",
-    "d3-geomap": "^2.0.0",
     "nuxt": "^2.4.0",
-    "nuxt-leaflet": "0.0.18",
-    "topojson-client": "^3.0.0",
-    "vue-choropleth": "^0.2.1"
+    "topojson-client": "^3.0.0"
   },
   "devDependencies": {
     "nodemon": "^1.18.9",

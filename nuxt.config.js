@@ -1,7 +1,12 @@
 import pkg from './package'
 
+const base = 'gh-pages' === process.env.NODE_ENV ? '/mma-esports-dataviz/' : '/';
+
 export default {
-  mode: 'universal',
+  mode: 'spa',
+  router: {
+    base,
+  },
 
   /*
   ** Headers of the page
@@ -59,6 +64,7 @@ export default {
   ** Build configuration
   */
   build: {
+    publicPath: '/static/',
     /*
     ** You can extend webpack config here
     */

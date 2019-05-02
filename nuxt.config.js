@@ -37,7 +37,8 @@ export default {
   ** Plugins to load before mounting the App
   */
   plugins: [
-    '~/plugins/d3.client.js'
+    '~/plugins/d3.client.js',
+    '~/plugins/tailwind.client.js'
   ],
 
   /*

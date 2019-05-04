@@ -114,24 +114,6 @@ export default {
         .on('zoom', zoomed);
 
       this.mapSvg.call(zoom);
-      // const mapWidth = this.$refs.map.clientWidth;
-      // const mapHeight = mapWidth/2;
-      
-      // this.mapSvg = this.$d3.select('.map')
-      //   .append('svg')
-      //     .attr('class', 'map')
-      //     .attr('viewBox', `0 0 ${mapWidth} ${mapHeight}`)
-      //     .style('width', '100%')
-      //     .style('height', 'auto');
-
-      // this.mapView = this.mapSvg.append('rect')
-      //   .attr('class', 'view')
-      //   .attr('x', 0.5)
-      //   .attr('y', 0.5)
-      //   .attr('width', mapWidth - 1)
-      //   .attr('height', mapHeight - 1)
-      //   .attr('fill', this.$tw.colors.secondary)
-      //   .style('opacity', 0.1)
     },
     drawPrizeDist: function () {
       this.drawViewPort('prize-dist', 0.35);

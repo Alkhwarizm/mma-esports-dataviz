@@ -42,13 +42,15 @@
 <script>
 const topojson = require('topojson-client');
 const world = require('../static/topojson/countries.json');
+const countryData = require('../static/data/2018-country-data.json');
 
 const countries = topojson.feature(world, world.objects.units).features
 
 export default {
   data() {
     return {
-      countries
+      countries,
+      countryData
     }
   },
   methods: {
@@ -95,7 +97,12 @@ export default {
           // .on("mouseout", this.handleMouseOut);
 
       const tooltip = worldMap.append('title')
-        .text(d => `${d.properties.name}`);
+        .text(d => {
+          const country = this.countryData
+            .find(el => d.properties.name.toLowerCase() === el.Country.toLowerCase())
+            || {Prize: '-', Player: '-'};
+          return `${d.properties.name}\nPrize: ${country.Prize}\nPlayer: ${country.Player}`;
+        });
 
       const zoomed = () => {
         worldMap.attr("transform", this.$d3.event.transform);
@@ -131,12 +138,12 @@ export default {
     },
     drawPlayerDist: function () {
       this.drawViewPort('player-dist', 0.35);
-    }
+    },
   },
   mounted() {
-    this.drawMap();
     this.drawPrizeDist();
     this.drawPlayerDist();
+    this.drawMap();
   }
 }
 </script>

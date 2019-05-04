@@ -31,8 +31,8 @@
         </h3>
         <div class="map w-full" ref="map"></div>
         <div class="slider w-full">
-          <div><p id="value-time"></p></div>
-          <div><div id="slider-time"></div></div>
+          <!-- <div><p id="value-time"></p></div> -->
+          <div><div id="slider-time" class="w-full"></div></div>
         </div>
       </div>
     </div>
@@ -123,6 +123,8 @@ export default {
       this.drawViewPort('player-dist', 0.35);
     },
     drawSlider: function () {
+      const sliderWidth = this.parseNumber(this.$d3.select('#slider-time').style('width'));
+
       const dataTime = this.$d3.range(0,4).map(d => {
         return new Date(2015 + d, 5, 4);
       });
@@ -132,30 +134,31 @@ export default {
         .min(this.$d3.min(dataTime))
         .max(this.$d3.max(dataTime))
         .step(1000 * 60 * 60 * 24 *365)
-        .width(300)
+        .width(sliderWidth*0.9)
         .tickFormat(this.$d3.timeFormat('%Y'))
         .tickValues(dataTime)
         .default(new Date(2015, 5, 4))
         .on('onchange', val => {
-          this.$d3.select('p#value-time').text(this.$d3.timeFormat('%Y')(val));
+          this.currentYear = this.$d3.timeFormat('%Y')(val);
+          // this.$d3.select('p#value-time').text(this.$d3.timeFormat('%Y')(val));
         });
 
       const gTime = this.$d3
         .select('div#slider-time')
         .append('svg')
-        .attr('width', 500)
+        .attr('width', '100%')
         .attr('height', 100)
         .append('g')
         .attr('transform', 'translate(30,30)');
 
       gTime.call(sliderTime);
-      this.$d3.select('p#value-time').text(this.$d3.timeFormat('%Y')(sliderTime.value()));
+      // this.$d3.select('p#value-time').text(this.$d3.timeFormat('%Y')(sliderTime.value()));
     }
   },
   mounted() {
+    this.drawMap();
     this.drawPrizeDist();
     this.drawPlayerDist();
-    this.drawMap();
     this.drawSlider();
   }
 }
@@ -195,5 +198,31 @@ export default {
   font-family: Orbitron;
   letter-spacing: 1pt;
   @apply text-white mt-1 ml-2;
+}
+
+g.tick text, g.parameter-value text {
+  font-family: Orbitron;
+  letter-spacing: 2pt;
+  fill: #1f9d55;
+  @apply text-base font-bold;
+}
+
+g.tick text {
+
+}
+
+g.parameter-value text {
+  fill: white;
+  @apply text-tertiary;
+}
+
+.handle {
+  fill: #001A2C;
+  stroke: #1f9d55;
+  stroke-width: 2px;
+}
+
+line.track, line.track-inset {
+  stroke: #1f9d55;
 }
 </style>

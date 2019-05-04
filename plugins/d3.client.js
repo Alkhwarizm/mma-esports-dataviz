@@ -1,8 +1,5 @@
-// import Vue from 'vue';
-const d3 = require('d3');
-const slider = require('d3-simple-slider');
+import * as d3 from './d3'
 
-// Vue.prototype.$d3 = d3;
 export default ({ app }, inject) => {
-    inject('d3', {...d3, ...slider});
+    inject('d3', d3);
 }

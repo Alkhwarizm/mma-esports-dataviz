@@ -43,10 +43,10 @@
 <script>
 const topojson = require('topojson-client');
 const world = require('../static/topojson/countries.json');
-const worldContinents = require('../static/topojson/world-continents.json');
+const wc = require('../static/topojson/world-continents.json');
 const countryData = require('../static/data/2018-country-data.json');
 
-const continents = topojson.feature(worldContinents, worldContinents.objects.continent).features;
+const continents = topojson.feature(wc, wc.objects.continent).features;
 const countries = topojson.feature(world, world.objects.units).features;
 const continentData = countryData.reduce(function (acc, curr) {
   const key = curr["Continent"]
@@ -118,6 +118,15 @@ export default {
           .attr('d', path)
           // .on("mouseover", this.handleMouseOver)
           // .on("mouseout", this.handleMouseOut);
+      
+      const continents = this.mapSvg.append('g')
+        .selectAll('path')
+        .data(this.continents)
+        .join('path')
+          .attr('fill', 'none')
+          .attr('d', path)
+          .attr('class', 'continent')
+          .attr('id', d => d.properties.continent.replace(' ', ''));
 
       const tooltip = worldMap.append('title')
         .text(d => {
@@ -129,6 +138,7 @@ export default {
 
       const zoomed = () => {
         worldMap.attr("transform", this.$d3.event.transform);
+        continents.attr("transform", this.$d3.event.transform);
       }
 
       const zoom = this.$d3.zoom()
@@ -211,6 +221,14 @@ export default {
       arcs.append('path')
         .attr('fill', (d, i) => color(i))
         .attr('d', arc)
+        .on('mouseover', (d, i) => {
+          this.$d3.select(`#${this.continentData[i].continent.replace(' ', '')}`)
+            .classed('highlighted', true);
+        })
+        .on('mouseout', (d, i) => {
+          this.$d3.selectAll('.continent')
+            .classed('highlighted', false);
+        })
 
       arcs.append('title')
         .text((d, i) => this.continentData[i].continent);
@@ -226,6 +244,16 @@ export default {
 </script>
 
 <style>
+.continent {
+  fill: none;
+}
+
+.continent.highlighted {
+  fill: #1f9d55;
+  stroke: #64DDDC;
+  stroke-width: 2px;
+}
+
 .container {
   @apply border border-2 border-secondary;
   @apply min-h-screen min-w-full justify-center items-center mx-auto;

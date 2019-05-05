@@ -43,9 +43,11 @@
 <script>
 const topojson = require('topojson-client');
 const world = require('../static/topojson/countries.json');
+const worldContinents = require('../static/topojson/world-continents.json');
 const countryData = require('../static/data/2018-country-data.json');
 
-const countries = topojson.feature(world, world.objects.units).features
+const continents = topojson.feature(worldContinents, worldContinents.objects.continent).features;
+const countries = topojson.feature(world, world.objects.units).features;
 const continentData = countryData.reduce(function (acc, curr) {
   const key = curr["Continent"]
   if (!acc[key]) {
@@ -63,8 +65,15 @@ export default {
   data() {
     return {
       countries,
+      continents,
       countryData,
-      continentData
+      continentData: Object.keys(continentData).map(key => {
+        return {
+          continent: key, 
+          prize: continentData[key].prize, 
+          player: continentData[key].player
+        }
+      })
     }
   },
   methods: {
@@ -131,9 +140,11 @@ export default {
     },
     drawPrizeDist: function () {
       this.drawViewPort('prize-dist', 0.35);
+      this.drawPie('prize-dist');
     },
     drawPlayerDist: function () {
       this.drawViewPort('player-dist', 0.35);
+      this.drawPie('player-dist');
     },
     drawSlider: function () {
       const sliderWidth = this.parseNumber(this.$d3.select('#slider-time').style('width'));
@@ -167,6 +178,43 @@ export default {
       gTime.call(sliderTime);
       // this.$d3.select('p#value-time').text(this.$d3.timeFormat('%Y')(sliderTime.value()));
     },
+    drawPie: function (elementRef) {
+      const dataType = {
+        'player-dist': 'player',
+        'prize-dist': 'prize',
+      }
+      const pieRad = this.parseNumber(this[`${elementRef}View`].style('height')) * 0.4;
+      const center = {
+        x: this.parseNumber(this[`${elementRef}View`].style('height')) * 0.5,
+        y: this.parseNumber(this[`${elementRef}View`].style('height')) * 0.5,
+      }
+      const color = this.$d3.scaleOrdinal(this.$d3.schemeSet1)
+
+      const vis = this[`${elementRef}Svg`]
+        .data(this.continentData)
+        .append('g')
+          .attr('transform', `translate(${center.x}, ${center.y})`)
+
+      const arc = this.$d3.arc()
+        .outerRadius(pieRad)
+        .innerRadius(0)
+
+      const piePrize = this.$d3.pie()
+        .value(d => d[dataType[elementRef]]);
+
+      const arcs = vis.selectAll('g.slice')
+        .data(piePrize(this.continentData))
+        .enter()
+          .append('g')
+            .attr('class', 'slice');
+      
+      arcs.append('path')
+        .attr('fill', (d, i) => color(i))
+        .attr('d', arc)
+
+      arcs.append('title')
+        .text((d, i) => this.continentData[i].continent);
+    }
   },
   mounted() {
     this.drawMap();

@@ -46,12 +46,25 @@ const world = require('../static/topojson/countries.json');
 const countryData = require('../static/data/2018-country-data.json');
 
 const countries = topojson.feature(world, world.objects.units).features
+const continentData = countryData.reduce(function (acc, curr) {
+  const key = curr["Continent"]
+  if (!acc[key]) {
+    acc[key] = {
+      prize: 0,
+      player: 0
+    }
+  }
+  acc[curr["Continent"]].prize += Number.parseFloat(curr["Prize"].replace(/[$,]/gm, ''));
+  acc[curr["Continent"]].player += Number.parseInt(curr["Player"]);
+  return acc;
+}, {});
 
 export default {
   data() {
     return {
       countries,
-      countryData
+      countryData,
+      continentData
     }
   },
   methods: {
@@ -153,7 +166,7 @@ export default {
 
       gTime.call(sliderTime);
       // this.$d3.select('p#value-time').text(this.$d3.timeFormat('%Y')(sliderTime.value()));
-    }
+    },
   },
   mounted() {
     this.drawMap();

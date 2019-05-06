@@ -123,8 +123,10 @@ export default {
         .data(this.countries)
         .join('path')
           .attr('fill', this.$tw.colors.tertiary)
-          .attr('stroke', this.$tw.colors.primary)
+          // .attr('stroke', this.$tw.colors.primary)
           .attr('d', path)
+          .attr('class', 'country')
+          .attr('id', d => d.properties.name.replace(/[. ]/gm, ''))
           // .on("mouseover", this.handleMouseOver)
           // .on("mouseout", this.handleMouseOut);
       
@@ -271,7 +273,15 @@ export default {
       bar.append('rect')
           .attr('fill', this.$tw.colors.tertiary)
           .attr('width', (d) => x(d[this.dataType[elementRef]]))
-          .attr('height', barHeight);
+          .attr('height', barHeight)
+          .on('mouseover', (d, i) => {
+            this.$d3.select(`#${d["Country"].replace(/[. ]/gm, '')}`)
+              .classed('highlighted', true);
+          })
+          .on('mouseout', (d, i) => {
+            this.$d3.selectAll('.country')
+              .classed('highlighted', false);
+          });
     }
   },
   mounted() {
@@ -295,6 +305,11 @@ export default {
 .continent.highlighted {
   fill: #1f9d55;
   stroke: #64DDDC;
+  stroke-width: 2px;
+}
+
+.country.highlighted {
+  stroke:#64DDDC;
   stroke-width: 2px;
 }
 

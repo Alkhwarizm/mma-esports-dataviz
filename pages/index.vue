@@ -44,7 +44,12 @@
 const topojson = require('topojson-client');
 const world = require('../static/topojson/countries.json');
 const wc = require('../static/topojson/world-continents.json');
-const countryData = require('../static/data/2018-country-data.json');
+const countryData = require('../static/data/2018-country-data.json')
+  .map(el => {
+    el.prize = Number.parseFloat(el["Prize"].replace(/[$,]/gm, ''));
+    el.player = Number.parseInt(el["Player"]);
+    return el;
+  });
 
 const continents = topojson.feature(wc, wc.objects.continent).features;
 const countries = topojson.feature(world, world.objects.units).features;
@@ -56,8 +61,8 @@ const continentData = countryData.reduce(function (acc, curr) {
       player: 0
     }
   }
-  acc[curr["Continent"]].prize += Number.parseFloat(curr["Prize"].replace(/[$,]/gm, ''));
-  acc[curr["Continent"]].player += Number.parseInt(curr["Player"]);
+  acc[curr["Continent"]].prize += curr.prize;
+  acc[curr["Continent"]].player += curr.player;
   return acc;
 }, {});
 
@@ -73,7 +78,11 @@ export default {
           prize: continentData[key].prize, 
           player: continentData[key].player
         }
-      })
+      }),
+      dataType: {
+        'player-dist': 'player',
+        'prize-dist': 'prize',
+      }
     }
   },
   methods: {
@@ -151,10 +160,12 @@ export default {
     drawPrizeDist: function () {
       this.drawViewPort('prize-dist', 0.35);
       this.drawPie('prize-dist');
+      this.drawBar('prize-dist');
     },
     drawPlayerDist: function () {
       this.drawViewPort('player-dist', 0.35);
       this.drawPie('player-dist');
+      this.drawBar('player-dist');
     },
     drawSlider: function () {
       const sliderWidth = this.parseNumber(this.$d3.select('#slider-time').style('width'));
@@ -189,10 +200,6 @@ export default {
       // this.$d3.select('p#value-time').text(this.$d3.timeFormat('%Y')(sliderTime.value()));
     },
     drawPie: function (elementRef) {
-      const dataType = {
-        'player-dist': 'player',
-        'prize-dist': 'prize',
-      }
       const pieRad = this.parseNumber(this[`${elementRef}View`].style('height')) * 0.4;
       const center = {
         x: this.parseNumber(this[`${elementRef}View`].style('height')) * 0.5,
@@ -210,7 +217,7 @@ export default {
         .innerRadius(0)
 
       const piePrize = this.$d3.pie()
-        .value(d => d[dataType[elementRef]]);
+        .value(d => d[this.dataType[elementRef]]);
 
       const arcs = vis.selectAll('g.slice')
         .data(piePrize(this.continentData))
@@ -232,6 +239,39 @@ export default {
 
       arcs.append('title')
         .text((d, i) => this.continentData[i].continent);
+    },
+    drawBar: function (elementRef) {
+      const viewHeight = this.parseNumber(this[`${elementRef}View`].style('height'))
+      const viewWidth = this.parseNumber(this[`${elementRef}View`].style('width'))
+      const barHeight = viewHeight * 0.125;
+      const barWidth = viewWidth * 0.4;
+      const posX = viewWidth * 0.55;
+      const posY = viewHeight * 0.125;
+      const barData = this.countryData
+        .sort((a, b) => b[this.dataType[elementRef]] - a[this.dataType[elementRef]])
+        .slice(0, 5);
+      const barMargin = 5;
+      console.log(barData);
+      
+      const x = this.$d3.scaleLinear()
+        .domain([0, this.$d3.max(barData, (d) => d[this.dataType[elementRef]])])
+        .range([0, barWidth]);
+
+      const chart = this[`${elementRef}Svg`]
+        .append('g')
+          .attr('transform', `translate(${posX}, ${posY})`)
+      
+      const bar = chart.selectAll('g')
+        .data(barData)
+        .enter()
+        .append('g')
+          .classed('bar', true)
+          .attr('transform', (d, i) => `translate(0, ${i*(barHeight+barMargin)})`)
+      
+      bar.append('rect')
+          .attr('fill', this.$tw.colors.tertiary)
+          .attr('width', (d) => x(d[this.dataType[elementRef]]))
+          .attr('height', barHeight);
     }
   },
   mounted() {
@@ -244,6 +284,10 @@ export default {
 </script>
 
 <style>
+.bar {
+  @apply mb-2;
+}
+
 .continent {
   fill: none;
 }

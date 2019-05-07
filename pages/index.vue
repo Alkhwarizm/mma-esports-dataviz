@@ -162,12 +162,12 @@ export default {
     drawPrizeDist: function () {
       this.drawViewPort('prize-dist', 0.35);
       this.drawPie('prize-dist');
-      this.drawBar('prize-dist');
+      this.drawBar('prize-dist', this.$d3.formatPrefix('$,.0r', 1e6));
     },
     drawPlayerDist: function () {
       this.drawViewPort('player-dist', 0.35);
       this.drawPie('player-dist');
-      this.drawBar('player-dist');
+      this.drawBar('player-dist', this.$d3.formatPrefix(',.1', 1e3));
     },
     drawSlider: function () {
       const sliderWidth = this.parseNumber(this.$d3.select('#slider-time').style('width'));
@@ -242,7 +242,7 @@ export default {
       arcs.append('title')
         .text((d, i) => this.continentData[i].continent);
     },
-    drawBar: function (elementRef) {
+    drawBar: function (elementRef, axisFormat = '') {
       const viewHeight = this.parseNumber(this[`${elementRef}View`].style('height'))
       const viewWidth = this.parseNumber(this[`${elementRef}View`].style('width'))
       const barHeight = viewHeight * 0.125;
@@ -258,6 +258,20 @@ export default {
       const x = this.$d3.scaleLinear()
         .domain([0, this.$d3.max(barData, (d) => d[this.dataType[elementRef]])])
         .range([0, barWidth]);
+
+      const y = this.$d3.scaleOrdinal()
+        .domain(barData.map(el => ''))
+        .range([0, barData.length*(barHeight+barMargin)]);
+
+      const yAxis = this.$d3.axisLeft()
+        .tickSize(0)
+        .scale(y)
+
+      const xAxis = this.$d3.axisBottom()
+        .scale(x)
+        .tickSize(7)
+        .ticks(5)
+        .tickFormat(axisFormat);
 
       const chart = this[`${elementRef}Svg`]
         .append('g')
@@ -282,6 +296,15 @@ export default {
             this.$d3.selectAll('.country')
               .classed('highlighted', false);
           });
+      
+      chart.append('g')
+        .classed('axis', true)
+        .attr('transform', `translate(0, ${barData.length*(barHeight+barMargin)})`)
+        .call(xAxis);
+      
+      chart.append('g')
+        .classed('axis', true)
+        .call(yAxis);
     }
   },
   mounted() {
@@ -296,6 +319,16 @@ export default {
 <style>
 .bar {
   @apply mb-2;
+}
+
+.dist .axis .domain, .dist .axis .tick line {
+  stroke: #64DDDC;
+  stroke-width: 2px;
+}
+
+.dist .axis .tick text {
+  fill: white;
+  font-size: 0.4rem;
 }
 
 .continent {

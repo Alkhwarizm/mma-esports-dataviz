@@ -352,22 +352,28 @@ export default {
         .attr('transform', 'translate(0, -1)')
         .call(yAxis);
     },
-    drawFocusedBar: function (elementRef, axisFormat = '') {
+    drawFocusedBar: function (elementRef, axisFormat = '', focusedContinent = 'North America') {
       const viewHeight = this.parseNumber(this[`${elementRef}View`].style('height'))
       const viewWidth = this.parseNumber(this[`${elementRef}View`].style('width'))
       const barHeight = viewHeight * 0.7;
       const barWidth = viewWidth * 0.030;
       const posX = viewWidth * 0.05;
       const posY = viewHeight * 0.125;
-      //TODO: ganti ke data kontinen
+
+      function filterByContinent(item) {
+        return (item.continent == focusedContinent);
+      }
+
       const barData = this.countryData
+        .filter(filterByContinent)
         .sort((a, b) => b[this.dataType[elementRef]] - a[this.dataType[elementRef]])
         .slice(0, 5);
-      const barMargin = 15;
+      const barMargin = barWidth * 1.2;
+
       console.log(barData);
       
-      const x = this.$d3.scaleOrdinal()
-        .domain(barData.map(el => ''))
+      const x = this.$d3.scaleBand()
+        .domain(barData.map(el => el.iso3))
         .range([0, barData.length*(barWidth + 2 * barMargin)]);;
 
       const y = this.$d3.scaleLinear()
@@ -394,17 +400,27 @@ export default {
           .attr('y', (d) => barHeight - y(d[this.dataType[elementRef]]))
           .attr('width', barWidth)
           .attr('height', (d) =>  y(d[this.dataType[elementRef]]))
+          //TODO: tambah mouseover ke axes, ada data yang sangat kecil e.g. North America
           .on('mouseover', (d, i) => {
-            this.$d3.select(`#${d["Country"].replace(/[. ]/gm, '')}`)
+            this.$d3.select(`#${d.iso3}`)
               .classed('highlighted', true);
           })
           .on('mouseout', (d, i) => {
             this.$d3.selectAll('.country')
               .classed('highlighted', false);
           });
+
+      if (elementRef == 'player-dist'){
+          bar.append('title')
+              .text(d => `${d.country}, ${(d[this.dataType[elementRef]])} players`);
+      } else if (elementRef == 'prize-dist') {
+          bar.append('title')
+              .text(d => `${d.country}, ${this.$d3.format('$,.2f')(d[this.dataType[elementRef]])}`);
+      }
+      
       
       chart.append('g')
-        .classed('axis', true)
+        .classed('x axis', true)
         .attr('transform', `translate(0, ${barHeight})`)
         .call(bottomAxis);
       
@@ -412,8 +428,14 @@ export default {
         .style('stroke', this.$tw.colors.secondary)
         .attr('x1', barMargin)
         .attr('y1', 0)
-        .attr('x2', posX + 100)
+        .attr('x2', barMargin + 2.5 * (barWidth + 2 * barMargin))
         .attr('y2', 0)
+
+      chart.append('text')
+        .attr('class', 'bar-text')
+        .attr('x', barMargin + 2 * (barWidth + 2 * barMargin))
+        .attr('y', - 5)
+        .text(barData[0][this.dataType[elementRef]])
     }
   },
   mounted() {

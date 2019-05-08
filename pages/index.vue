@@ -242,11 +242,11 @@ export default {
       arcs.append('title')
         .text((d, i) => this.continentData[i].continent);
     },
-    drawBar: function (elementRef, axisFormat = '') {
+    drawBar: function (elementRef, axisFormat) {
       const viewHeight = this.parseNumber(this[`${elementRef}View`].style('height'))
       const viewWidth = this.parseNumber(this[`${elementRef}View`].style('width'))
       const barHeight = viewHeight * 0.125;
-      const barWidth = viewWidth * 0.4;
+      const barWidth = viewWidth * 0.35;
       const posX = viewWidth * 0.55;
       const posY = viewHeight * 0.125;
       const barData = this.countryData
@@ -259,13 +259,14 @@ export default {
         .domain([0, this.$d3.max(barData, (d) => d[this.dataType[elementRef]])])
         .range([0, barWidth]);
 
-      const y = this.$d3.scaleOrdinal()
-        .domain(barData.map(el => ''))
+      const y = this.$d3.scaleBand()
+        .domain(barData.map(el => el.Country))
         .range([0, barData.length*(barHeight+barMargin)]);
 
-      const yAxis = this.$d3.axisLeft()
+      const yAxis = this.$d3.axisRight()
         .tickSize(0)
         .scale(y)
+        .tickPadding(5)
 
       const xAxis = this.$d3.axisBottom()
         .scale(x)
@@ -296,14 +297,21 @@ export default {
             this.$d3.selectAll('.country')
               .classed('highlighted', false);
           });
+
+      bar.append('text')
+        .attr('class', 'bar-text')
+        .attr('x', (d) => x(d[this.dataType[elementRef]]) + 2)
+        .attr('y', (d, i) => (barHeight/2) + barMargin)
+        .text((d) => axisFormat(d[this.dataType[elementRef]]))
       
       chart.append('g')
-        .classed('axis', true)
+        .classed('x axis', true)
         .attr('transform', `translate(0, ${barData.length*(barHeight+barMargin)})`)
         .call(xAxis);
       
       chart.append('g')
-        .classed('axis', true)
+        .classed('y axis', true)
+        .attr('transform', 'translate(0, -1)')
         .call(yAxis);
     }
   },
@@ -321,14 +329,23 @@ export default {
   @apply mb-2;
 }
 
+.bar-text {
+  fill: white;
+}
+
 .dist .axis .domain, .dist .axis .tick line {
   stroke: #64DDDC;
   stroke-width: 2px;
 }
 
-.dist .axis .tick text {
+.dist .x.axis .tick text {
   fill: white;
   font-size: 0.4rem;
+}
+
+.dist .y.axis .tick text {
+  fill: white;
+  font-size: 0.5rem;
 }
 
 .continent {

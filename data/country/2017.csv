@@ -1,0 +1,238 @@
+continent,country,prize,player,iso3
+Asia,China,"$16,612,657.52",1155,CHN
+North America,United States of America,"$15,110,157.16",2937,USA
+Asia,Republic of Korea,"$12,150,177.95",958,KOR
+Europe,Denmark,"$5,020,225.37",362,DNK
+Europe,Germany,"$4,804,525.14",714,DEU
+Europe,Sweden,"$4,795,833.96",623,SWE
+Europe,Finland,"$3,959,919.53",359,FIN
+Europe,France,"$3,670,314.42",732,FRA
+Europe,Russian Federation,"$3,576,238.00",553,RUS
+South America,Brazil,"$3,344,500.70",711,BRA
+North America,Canada,"$2,828,368.32",515,CAN
+Europe,United Kingdom of Great Britain and Northern Ireland,"$2,825,729.61",577,GBR
+Europe,Ukraine,"$2,789,030.73",156,UKR
+Asia,Jordan,"$2,735,011.78",20,JOR
+Europe,Bulgaria,"$2,635,978.63",92,BGR
+Oceania,Australia,"$2,552,062.48",580,AUS
+Asia,Lebanon,"$2,450,968.76",23,LBN
+Europe,Poland,"$2,379,123.00",585,POL
+Asia,Philippines,"$2,134,043.16",169,PHL
+Asia,"Taiwan, China","$1,557,050.98",219,TWN
+Asia,Malaysia,"$1,131,513.21",171,MYS
+Europe,Netherlands,"$1,026,266.78",241,NLD
+Asia,Japan,"$872,363.51",238,JPN
+Asia,Viet Nam,"$757,565.86",225,VNM
+Europe,Norway,"$724,180.31",144,NOR
+Asia,Kazakhstan,"$627,505.53",50,KAZ
+Europe,Spain,"$613,389.18",292,ESP
+Asia,Macao Special Administrative Region of China,"$560,161.66",2,MAC
+South America,Mexico,541353.1,87,MEX
+Asia,Turkey,"$491,246.24",144,TUR
+Asia,Israel,"$472,565.06",54,ISR
+Europe,Estonia,"$460,066.25",67,EST
+Europe,Slovakia,"$448,064.46",58,SVK
+Europe,Italy,"$434,544.75",200,ITA
+Asia,Thailand,"$401,074.88",172,THA
+South America,Peru,"$393,922.11",93,PER
+Europe,Belarus,"$389,964.73",63,BLR
+Asia,Singapore,"$384,182.69",168,SGP
+Europe,Bosnia and Herzegovina,"$335,652.36",11,BIH
+Europe,Czech Republic,"$273,828.56",95,CZE
+Europe,Belgium,"$268,854.94",107,BEL
+Asia,Pakistan,"$268,307.40",15,PAK
+North America,Dominican Republic,"$262,184.87",5,DOM
+Africa,South Africa,"$243,713.98",179,ZAF
+Europe,Croatia,"$234,208.37",55,HRV
+Europe,Romania,"$214,781.03",76,ROU
+South America,Chile,210502.87,100,CHL
+Asia,Hong Kong Special Administrative Region of China,"$206,221.23",97,HKG
+South America,Argentina,"$202,361.83",148,ARG
+Asia,Indonesia,"$193,929.16",136,IDN
+Europe,Portugal,"$190,986.36",167,PRT
+Oceania,New Zealand,"$173,556.48",73,NZL
+Europe,Austria,"$170,563.54",83,AUT
+Europe,Greece,"$165,537.53",95,GRC
+Europe,Serbia,"$162,335.39",75,SRB
+Europe,Ireland,"$125,635.95",25,IRL
+Europe,Hungary,"$120,403.81",98,HUN
+Asia,Saudi Arabia,"$103,269.38",10,SAU
+Europe,Switzerland,"$99,637.11",75,CHE
+Europe,Lithuania,"$91,776.95",72,LTU
+Asia,India,"$82,227.96",136,IND
+Europe,Latvia,"$79,268.76",78,LVA
+Europe,The former Yugoslav Republic of Macedonia,"$78,116.51",5,MKD
+North America,Puerto Rico,"$72,682.57",16,PRI
+Europe,Slovenia,"$54,127.85",22,SVN
+Asia,United Arab Emirates,"$47,983.94",24,ARE
+South America,Colombia,"$46,634.76",25,COL
+Africa,Algeria,"$32,702.47",15,DZA
+Asia,Mongolia,"$32,096.97",28,MNG
+Asia,Bahrain,"$31,195.00",2,BHR
+Asia,Iraq,"$28,170.60",9,IRQ
+Europe,Montenegro,"$27,550.00",2,MNE
+Europe,Uruguay,"$22,952.49",14,URY
+Asia,Kyrgyzstan,"$15,648.53",14,KGZ
+Europe,Moldova,"$14,743.32",5,MDA
+Europe,Iceland,"$14,681.24",27,ISL
+Asia,Armenia,"$13,793.05",3,ARM
+Africa,Morocco,"$13,423.44",12,MAR
+South America,Ecuador,"$10,263.49",5,ECU
+North America,Nicaragua,"$9,091.07",1,NIC
+Asia,Kuwait,"$8,150.04",13,KWT
+Africa,Egypt,"$8,131.68",11,EGY
+Africa,Tunisia,"$7,291.41",12,TUN
+North America,El Salvador,"$6,300.00",6,SLV
+Asia,Cambodia,"$5,415.25",5,KHM
+Africa,Cameroon,4921.63,1,CMR
+North America,Panama,"$4,857.14",3,PAN
+Europe,Gibraltar,"$4,500.00",1,GIB
+Europe,Malta,"$3,692.77",33,MLT
+Asia,Sri Lanka,3663.4,16,LKA
+Asia,Uzbekistan,"$3,512.18",3,UZB
+Asia,Georgia,"$3,256.13",27,GEO
+Europe,Albania,"$2,868.16",2,ALB
+North America,Guatemala,"$1,634.54",9,GTM
+South America,Bolivia,"$1,608.25",1,BOL
+Asia,Syrian Arab Republic,"$1,606.37",3,SYR
+Asia,Azerbaijan,"$1,600.00",4,AZE
+Asia,Bangladesh,$935.65,10,BGD
+Asia,Lao People's Democratic Republic,$783.36,3,LAO
+North America,Cuba,$770.00,1,CUB
+Asia,Occupied Palestinian Territory,$659.32,3,PSE
+Africa,Kenya,575.06,1,KEN
+Africa,Madagascar,458,1,MDG
+Asia,"Iran, Islamic Republic of",$381.60,9,IRN
+North America,Trinidad and Tobago,$291.41,1,TTO
+Europe,Åland Islands,250,1,ALA
+Africa,Ethiopia,$139.99,1,ETH
+Europe,Andorra,139.71,1,AND
+Europe,Luxembourg,$130.65,3,LUX
+Oceania,New Caledonia,$112.97,1,NCL
+North America,Bahamas,$66.00,1,BHS
+North America,Costa Rica,$49.65,1,CRI
+Oceania,French Polynesia,45,1,PYF
+Europe,Cyprus,33.33,1,CYP
+Europe,Faeroe Islands,$11.55,1,FRO
+,Afghanistan,,,AFG
+,American Samoa,,,ASM
+,Angola,,,AGO
+,Anguilla,,,AIA
+,Antigua and Barbuda,,,ATG
+,Aruba,,,ABW
+,Barbados,,,BRB
+,Belize,,,BLZ
+,Benin,,,BEN
+North America,Bermuda,,,BMU
+,Bhutan,,,BTN
+,Botswana,,,BWA
+,British Virgin Islands,,,VGB
+Asia,Brunei Darussalam,,,BRN
+,Burkina Faso,,,BFA
+,Burundi,,,BDI
+,Cape Verde,,,CPV
+,Cayman Islands,,,CYM
+,Central African Republic,,,CAF
+,Chad,,,TCD
+,Comoros,,,COM
+,Congo,,,COG
+,Cook Islands,,,COK
+,Côte d'Ivoire,,,CIV
+,Democratic People's Republic of Korea,,,PRK
+,Democratic Republic of the Congo,,,COD
+,Djibouti,,,DJI
+,Dominica,,,DMA
+,Equatorial Guinea,,,GNQ
+,Eritrea,,,ERI
+,Falkland Islands (Malvinas),,,FLK
+,Fiji,,,FJI
+,French Guiana,,,GUF
+,Gabon,,,GAB
+,Gambia,,,GMB
+,Ghana,,,GHA
+North America,Greenland,,,GRL
+,Grenada,,,GRD
+,Guadeloupe,,,GLP
+,Guam,,,GUM
+,Guernsey,,,GGY
+,Guinea,,,GIN
+,Guinea-Bissau,,,GNB
+,Guyana,,,GUY
+,Haiti,,,HTI
+,Holy See,,,VAT
+North America,Honduras,,,HND
+Europe,Isle of Man,,,IMN
+,Jamaica,,,JAM
+,Jersey,,,JEY
+,Kiribati,,,KIR
+,Lesotho,,,LSO
+,Liberia,,,LBR
+,Libyan Arab Jamahiriya,,,LBY
+,Liechtenstein,,,LIE
+,Malawi,,,MWI
+Asia,Maldives,,,MDV
+,Mali,,,MLI
+,Marshall Islands,,,MHL
+,Martinique,,,MTQ
+,Mauritania,,,MRT
+Africa,Mauritius,,,MUS
+,Mayotte,,,MYT
+,"Micronesia, Federated States of",,,FSM
+Europe,Monaco,,,MCO
+,Montserrat,,,MSR
+,Mozambique,,,MOZ
+Asia,Myanmar,,,MMR
+,Namibia,,,NAM
+,Nauru,,,NRU
+,Nepal,,,NPL
+,Netherlands Antilles,,,ANT
+,Niger,,,NER
+,Nigeria,,,NGA
+,Niue,,,NIU
+,Norfolk Island,,,NFK
+,Northern Mariana Islands,,,MNP
+,Oman,,,OMN
+,Palau,,,PLW
+,Papua New Guinea,,,PNG
+,Paraguay,,,PRY
+,Pitcairn,,,PCN
+,Qatar,,,QAT
+,R_union,,,REU
+,Rwanda,,,RWA
+,Saint-Barthélemy,,,BLM
+,Saint Helena,,,SHN
+,Saint Kitts and Nevis,,,KNA
+,Saint Lucia,,,LCA
+,Saint-Martin (French part),,,MAF
+,Saint Pierre and Miquelon,,,SPM
+,Saint Vincent and the Grenadines,,,VCT
+,Samoa,,,WSM
+,San Marino,,,SMR
+,Sao Tome and Principe,,,STP
+,Senegal,,,SEN
+,Seychelles,,,SYC
+,Sierra Leone,,,SLE
+,Solomon Islands,,,SLB
+,Somalia,,,SOM
+,Sudan,,,SDN
+,Suriname,,,SUR
+,Svalbard and Jan Mayen Islands,,,SJM
+,Swaziland,,,SWZ
+,Tajikistan,,,TJK
+,Timor-Leste,,,TLS
+,Togo,,,TGO
+,Tokelau,,,TKL
+,Tonga,,,TON
+,Turkmenistan,,,TKM
+,Turks and Caicos Islands,,,TCA
+,Tuvalu,,,TUV
+,Uganda,,,UGA
+,United Republic of Tanzania,,,TZA
+North America,United States Virgin Islands,,,VIR
+,Vanuatu,,,VUT
+South America,Venezuela (Bolivarian Republic of),,,VEN
+,Wallis and Futuna Islands,,,WLF
+,Western Sahara,,,ESH
+Asia,Yemen,,,YEM
+,Zambia,,,ZMB
+,Zimbabwe,,,ZWE

@@ -11,7 +11,7 @@
       </div>
     </div>
     <div class="row">
-      <div class="w-1/2 h-full">
+      <div class="w-1/2 min-h-full">
         <div class="row">
           <div class="grid padded w-full h-full">
             <h3 class="title">PRIZE DISTRIBUTION</h3>
@@ -25,7 +25,7 @@
           </div>
         </div>
       </div>
-      <div class="grid padded w-1/2 h-full">
+      <div class="grid padded w-1/2 min-h-full">
         <h3 class="title">
           WORLD MAP
         </h3>
@@ -46,23 +46,23 @@ const world = require('../static/topojson/countries.json');
 const wc = require('../static/topojson/world-continents.json');
 const countryData = require('../static/data/2018-country-data.json')
   .map(el => {
-    el.prize = Number.parseFloat(el["Prize"].replace(/[$,]/gm, ''));
-    el.player = Number.parseInt(el["Player"]);
+    el.prize = Number.parseFloat(el.prize.replace(/[$,]/gm, ''));
+    el.player = Number.parseInt(el.player);
     return el;
   });
 
 const continents = topojson.feature(wc, wc.objects.continent).features;
 const countries = topojson.feature(world, world.objects.units).features;
 const continentData = countryData.reduce(function (acc, curr) {
-  const key = curr["Continent"]
+  const key = curr.continent
   if (!acc[key]) {
     acc[key] = {
       prize: 0,
       player: 0
     }
   }
-  acc[curr["Continent"]].prize += curr.prize;
-  acc[curr["Continent"]].player += curr.player;
+  acc[curr.continent].prize += curr.prize;
+  acc[curr.continent].player += curr.player;
   return acc;
 }, {});
 
@@ -142,9 +142,9 @@ export default {
       const tooltip = worldMap.append('title')
         .text(d => {
           const country = this.countryData
-            .find(el => d.properties.name.toLowerCase() === el.Country.toLowerCase())
-            || {Prize: '-', Player: '-'};
-          return `${d.properties.name}\nPrize: ${country.Prize}\nPlayer: ${country.Player}`;
+            .find(el => d.properties.name.toLowerCase() === el.country.toLowerCase())
+            || {prize: '-', player: '-'};
+          return `${d.properties.name}\nPrize: ${country.prize}\nPlayer: ${country.player}`;
         });
 
       const zoomed = () => {
@@ -160,20 +160,20 @@ export default {
       this.mapSvg.call(zoom);
     },
     drawPrizeDist: function () {
-      this.drawViewPort('prize-dist', 0.35);
+      this.drawViewPort('prize-dist', 0.37);
       this.drawPie('prize-dist');
       this.drawBar('prize-dist', this.$d3.formatPrefix('$,.0r', 1e6));
     },
     drawPlayerDist: function () {
-      this.drawViewPort('player-dist', 0.35);
+      this.drawViewPort('player-dist', 0.37);
       this.drawPie('player-dist');
       this.drawBar('player-dist', this.$d3.formatPrefix(',.1', 1e3));
     },
     drawSlider: function () {
       const sliderWidth = this.parseNumber(this.$d3.select('#slider-time').style('width'));
 
-      const dataTime = this.$d3.range(0,4).map(d => {
-        return new Date(2015 + d, 5, 4);
+      const dataTime = this.$d3.range(0,3).map(d => {
+        return new Date(2016 + d, 5, 4);
       });
 
       const sliderTime = this.$d3
@@ -181,7 +181,7 @@ export default {
         .min(this.$d3.min(dataTime))
         .max(this.$d3.max(dataTime))
         .step(1000 * 60 * 60 * 24 *365)
-        .width(sliderWidth*0.9)
+        .width(sliderWidth*0.5)
         .tickFormat(this.$d3.timeFormat('%Y'))
         .tickValues(dataTime)
         .default(new Date(2015, 5, 4))
@@ -196,7 +196,7 @@ export default {
         .attr('width', '100%')
         .attr('height', 100)
         .append('g')
-        .attr('transform', 'translate(30,30)');
+        .attr('transform', `translate(${sliderWidth*0.45},30)`);
 
       gTime.call(sliderTime);
       // this.$d3.select('p#value-time').text(this.$d3.timeFormat('%Y')(sliderTime.value()));
@@ -260,7 +260,7 @@ export default {
         .range([0, barWidth]);
 
       const y = this.$d3.scaleBand()
-        .domain(barData.map(el => el.Country))
+        .domain(barData.map(el => el.country))
         .range([0, barData.length*(barHeight+barMargin)]);
 
       const yAxis = this.$d3.axisRight()
@@ -290,7 +290,7 @@ export default {
           .attr('width', (d) => x(d[this.dataType[elementRef]]))
           .attr('height', barHeight)
           .on('mouseover', (d, i) => {
-            this.$d3.select(`#${d["Country"].replace(/[. ]/gm, '')}`)
+            this.$d3.select(`#${d.country.replace(/[. ]/gm, '')}`)
               .classed('highlighted', true);
           })
           .on('mouseout', (d, i) => {

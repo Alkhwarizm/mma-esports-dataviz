@@ -147,7 +147,7 @@ export default {
 
       const opacity = this.$d3.scaleQuantile()
         .domain(this.countryData.map(el => el[this.currentMapData]))
-        .range([.1, .2, .3, .4, .45, .5, .55, .6, .65, .7, .75, .8, .9, 1.0])
+        .range([.1, .3, .4, .45, .5, .55, .6, .65, .7, .75, .8, 1.0])
 
       const worldMap = this.mapSvg.append('g')
         .selectAll('path')
@@ -243,10 +243,12 @@ export default {
       // this.$d3.select('p#value-time').text(this.$d3.timeFormat('%Y')(sliderTime.value()));
     },
     drawPie: function (elementRef) {
-      const pieRad = this.parseNumber(this[`${elementRef}View`].style('height')) * 0.4;
+      const title = 'CONTINENTS DISTRIBUTION'
+      const viewHeight = this.parseNumber(this[`${elementRef}View`].style('height'))
+      const pieRad = viewHeight * 0.38;
       const center = {
-        x: this.parseNumber(this[`${elementRef}View`].style('height')) * 0.5,
-        y: this.parseNumber(this[`${elementRef}View`].style('height')) * 0.5,
+        x: viewHeight * 0.425,
+        y: viewHeight * 0.575,
       }
       const color = this.$d3.scaleOrdinal(this.$d3.schemeSet1)
 
@@ -254,6 +256,12 @@ export default {
         .data(this.continentData)
         .append('g')
           .attr('transform', `translate(${center.x}, ${center.y})`)
+
+      const pieTitle = this[`${elementRef}Svg`]
+        .append('text')
+          .attr('transform', `translate(${viewHeight*0.05}, ${viewHeight*0.1})`)
+          .attr('class', 'pie-title')
+          .text(title)
 
       const arc = this.$d3.arc()
         .outerRadius(pieRad)
@@ -284,17 +292,17 @@ export default {
         .text((d, i) => this.continentData[i].continent);
     },
     drawBar: function (elementRef, axisFormat) {
+      const title = 'TOP 5 COUNTRIES';
       const viewHeight = this.parseNumber(this[`${elementRef}View`].style('height'))
       const viewWidth = this.parseNumber(this[`${elementRef}View`].style('width'))
       const barHeight = viewHeight * 0.125;
       const barWidth = viewWidth * 0.35;
       const posX = viewWidth * 0.55;
-      const posY = viewHeight * 0.125;
+      const posY = viewHeight * 0.175;
       const barData = this.countryData
         .sort((a, b) => b[this.dataType[elementRef]] - a[this.dataType[elementRef]])
         .slice(0, 5);
       const barMargin = 5;
-      console.log(barData);
       
       const x = this.$d3.scaleLinear()
         .domain([0, this.$d3.max(barData, (d) => d[this.dataType[elementRef]])])
@@ -318,6 +326,12 @@ export default {
       const chart = this[`${elementRef}Svg`]
         .append('g')
           .attr('transform', `translate(${posX}, ${posY})`)
+
+      const barTitle = this[`${elementRef}Svg`]
+        .append('text')
+          .attr('class', 'bar-title')
+          .attr('transform', `translate(${posX}, ${viewHeight*0.1})`)
+          .text(title);
       
       const bar = chart.selectAll('g')
         .data(barData)
@@ -378,8 +392,8 @@ export default {
 }
 
 .dist .axis .domain, .dist .axis .tick line {
-  stroke: #64DDDC;
   stroke-width: 2px;
+  @apply stroke-secondary;
 }
 
 .dist .x.axis .tick text {
@@ -392,19 +406,22 @@ export default {
   font-size: 0.5rem;
 }
 
+.pie-title, .bar-title {
+  @apply fill-tertiary font-semibold;
+}
+
 .continent {
   fill: none;
 }
 
 .continent.highlighted {
-  fill: #1f9d55;
-  stroke: #64DDDC;
   stroke-width: 2px;
+  @apply stroke-secondary fill-tertiary;
 }
 
 .country.highlighted {
-  stroke:#64DDDC;
   stroke-width: 2px;
+  @apply stroke-secondary;
 }
 
 .container {
@@ -445,8 +462,7 @@ export default {
 g.tick text, g.parameter-value text {
   font-family: Orbitron;
   letter-spacing: 2pt;
-  fill: #1f9d55;
-  @apply text-base font-bold;
+  @apply text-base font-bold fill-tertiary;
 }
 
 g.tick text {
@@ -459,12 +475,11 @@ g.parameter-value text {
 }
 
 .handle {
-  fill: #001A2C;
-  stroke: #1f9d55;
   stroke-width: 2px;
+  @apply fill-primary stroke-tertiary;
 }
 
 line.track, line.track-inset {
-  stroke: #1f9d55;
+  @apply stroke-tertiary;
 }
 </style>

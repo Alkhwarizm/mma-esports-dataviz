@@ -185,6 +185,7 @@ export default {
       const zoomed = () => {
         worldMap.attr("transform", this.$d3.event.transform);
         continents.attr("transform", this.$d3.event.transform);
+        this.mapTransformState = this.$d3.event.transform;
       }
 
       const zoom = this.$d3.zoom()
@@ -193,6 +194,11 @@ export default {
         .on('zoom', zoomed);
 
       this.mapSvg.call(zoom);
+
+      if (this.mapTransformState) {
+        worldMap.attr("transform", this.mapTransformState);
+        continents.attr("transform", this.mapTransformState);
+      }
     },
     drawPrizeDist: function () {
       this.drawViewPort('prize-dist', 0.37);

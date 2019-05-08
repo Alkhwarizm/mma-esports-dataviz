@@ -31,7 +31,7 @@
         </h3>
         <div class="map w-full" ref="map"></div>
         <div class="slider w-full">
-          <!-- <div><p id="value-time"></p></div> -->
+          <div hidden><input id="value-time" v-model="currentYear" type="text" /></div>
           <div><div id="slider-time" class="w-full"></div></div>
         </div>
       </div>
@@ -41,48 +41,60 @@
 </template>
 
 <script>
+function parseData(el) {
+  el.prize = Number.parseFloat(el.prize.replace(/[$,]/gm, ''));
+  el.player = Number.parseInt(el.player);
+  return el;
+}
+
 const topojson = require('topojson-client');
 const world = require('../static/topojson/countries.json');
 const wc = require('../static/topojson/world-continents.json');
-const countryData = require('../static/data/2018-country-data.json')
-  .map(el => {
-    el.prize = Number.parseFloat(el.prize.replace(/[$,]/gm, ''));
-    el.player = Number.parseInt(el.player);
-    return el;
-  });
+const mainData = {
+  '2016': require('../static/data/2016.json').map(parseData),
+  '2017': require('../static/data/2017.json').map(parseData),
+  '2018': require('../static/data/2018.json').map(parseData),
+}
 
 const continents = topojson.feature(wc, wc.objects.continent).features;
 const countries = topojson.feature(world, world.objects.units).features;
-const continentData = countryData.reduce(function (acc, curr) {
-  const key = curr.continent
-  if (!acc[key]) {
-    acc[key] = {
-      prize: 0,
-      player: 0
-    }
-  }
-  acc[curr.continent].prize += curr.prize;
-  acc[curr.continent].player += curr.player;
-  return acc;
-}, {});
 
 export default {
   data() {
     return {
       countries,
       continents,
-      countryData,
-      continentData: Object.keys(continentData).map(key => {
-        return {
-          continent: key, 
-          prize: continentData[key].prize, 
-          player: continentData[key].player
-        }
-      }),
+      currentYear: 2016,
       dataType: {
         'player-dist': 'player',
         'prize-dist': 'prize',
       }
+    }
+  },
+  computed: {
+    countryData: function () {
+      return mainData[this.currentYear];
+    },
+    continentData: function () {
+      const temp = this.countryData.reduce(function (acc, curr) {
+        const key = curr.continent
+        if (!acc[key]) {
+          acc[key] = {
+            prize: 0,
+            player: 0
+          }
+        }
+        acc[curr.continent].prize += curr.prize ? curr.prize : 0;
+        acc[curr.continent].player += curr.player ? curr.player : 0;
+        return acc;
+      }, {});
+      return Object.keys(temp).map(key => {
+        return {
+          continent: key, 
+          prize: temp[key].prize, 
+          player: temp[key].player
+        }
+      })
     }
   },
   methods: {
@@ -188,6 +200,7 @@ export default {
         .on('onchange', val => {
           this.currentYear = this.$d3.timeFormat('%Y')(val);
           // this.$d3.select('p#value-time').text(this.$d3.timeFormat('%Y')(val));
+          this.$d3.select('#value-time').attr('value', this.$d3.timeFormat('%Y')(val));
         });
 
       const gTime = this.$d3

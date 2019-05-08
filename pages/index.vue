@@ -161,13 +161,13 @@ export default {
     },
     drawPrizeDist: function () {
       this.drawViewPort('prize-dist', 0.35);
-      this.drawPie('prize-dist');
-      this.drawBar('prize-dist', this.$d3.formatPrefix('$,.0r', 1e6));
+      //this.drawPie('prize-dist');
+      this.drawFocusedBar('prize-dist', this.$d3.formatPrefix('$,.0r', 1e6));
     },
     drawPlayerDist: function () {
       this.drawViewPort('player-dist', 0.35);
-      this.drawPie('player-dist');
-      this.drawBar('player-dist', this.$d3.formatPrefix(',.1', 1e3));
+      //this.drawPie('player-dist');
+      this.drawFocusedBar('player-dist', this.$d3.formatPrefix(',.1', 1e3));
     },
     drawSlider: function () {
       const sliderWidth = this.parseNumber(this.$d3.select('#slider-time').style('width'));
@@ -305,6 +305,69 @@ export default {
       chart.append('g')
         .classed('axis', true)
         .call(yAxis);
+    },
+    drawFocusedBar: function (elementRef, axisFormat = '') {
+      const viewHeight = this.parseNumber(this[`${elementRef}View`].style('height'))
+      const viewWidth = this.parseNumber(this[`${elementRef}View`].style('width'))
+      const barHeight = viewHeight * 0.7;
+      const barWidth = viewWidth * 0.030;
+      const posX = viewWidth * 0.05;
+      const posY = viewHeight * 0.125;
+      //TODO: ganti ke data kontinen
+      const barData = this.countryData
+        .sort((a, b) => b[this.dataType[elementRef]] - a[this.dataType[elementRef]])
+        .slice(0, 5);
+      const barMargin = 15;
+      console.log(barData);
+      
+      const x = this.$d3.scaleOrdinal()
+        .domain(barData.map(el => ''))
+        .range([0, barData.length*(barWidth + 2 * barMargin)]);;
+
+      const y = this.$d3.scaleLinear()
+        .domain([0, this.$d3.max(barData, (d) => d[this.dataType[elementRef]])])
+        .range([0, barHeight]);
+
+      const bottomAxis = this.$d3.axisBottom()
+        .scale(x)
+        .tickSize(0)
+
+      const chart = this[`${elementRef}Svg`]
+        .append('g')
+          .attr('transform', `translate(${posX}, ${posY})`)
+      
+      const bar = chart.selectAll('g')
+        .data(barData)
+        .enter()
+        .append('g')
+          .classed('bar', true)
+      
+      bar.append('rect')
+          .attr('fill', this.$tw.colors.tertiary)
+          .attr('x', (d, i) => i*(barWidth+ 2 * barMargin) + barMargin)
+          .attr('y', (d) => barHeight - y(d[this.dataType[elementRef]]))
+          .attr('width', barWidth)
+          .attr('height', (d) =>  y(d[this.dataType[elementRef]]))
+          .on('mouseover', (d, i) => {
+            this.$d3.select(`#${d["Country"].replace(/[. ]/gm, '')}`)
+              .classed('highlighted', true);
+          })
+          .on('mouseout', (d, i) => {
+            this.$d3.selectAll('.country')
+              .classed('highlighted', false);
+          });
+      
+      chart.append('g')
+        .classed('axis', true)
+        .attr('transform', `translate(0, ${barHeight})`)
+        .call(bottomAxis);
+      
+      chart.append('line')
+        .style('stroke', this.$tw.colors.secondary)
+        .attr('x1', barMargin)
+        .attr('y1', 0)
+        .attr('x2', posX + 100)
+        .attr('y2', 0)
     }
   },
   mounted() {

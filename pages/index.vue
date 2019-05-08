@@ -65,6 +65,7 @@ export default {
       countries,
       continents,
       currentYear: 2016,
+      currentMapData: 'player',
       dataType: {
         'player-dist': 'player',
         'prize-dist': 'prize',
@@ -95,6 +96,16 @@ export default {
           player: temp[key].player
         }
       })
+    }
+  },
+  watch: {
+    currentYear: function () {
+      this.$d3.select('div.prize-dist').html(null);
+      this.drawPrizeDist();
+      this.$d3.select('div.player-dist').html(null);
+      this.drawPlayerDist();
+      this.$d3.select('div.map').html(null);
+      this.drawMap();
     }
   },
   methods: {
@@ -130,15 +141,27 @@ export default {
 
       const path = this.$d3.geoPath(projection);
 
+      // const color = this.$d3.scaleQuantile()
+      //   .domain(this.countryData.map(el => el[this.currentMapData]))
+      //   .range(this.$d3.schemeGreens[9]);
+
+      const opacity = this.$d3.scaleQuantile()
+        .domain(this.countryData.map(el => el[this.currentMapData]))
+        .range([.1, .2, .3, .4, .45, .5, .55, .6, .65, .7, .75, .8, .9, 1.0])
+
       const worldMap = this.mapSvg.append('g')
         .selectAll('path')
         .data(this.countries)
         .join('path')
           .attr('fill', this.$tw.colors.tertiary)
+          .attr('opacity', d => {
+            const country = this.countryData.find(c => c.iso3 === d.properties.iso3) || {};
+            return opacity(country[this.currentMapData] ? country[this.currentMapData] : 0);
+          })
           // .attr('stroke', this.$tw.colors.primary)
           .attr('d', path)
           .attr('class', 'country')
-          .attr('id', d => d.properties.name.replace(/[. ]/gm, ''))
+          .attr('id', d => d.properties.iso3)
           // .on("mouseover", this.handleMouseOver)
           // .on("mouseout", this.handleMouseOut);
       
@@ -153,10 +176,10 @@ export default {
 
       const tooltip = worldMap.append('title')
         .text(d => {
-          const country = this.countryData
-            .find(el => d.properties.name.toLowerCase() === el.country.toLowerCase())
-            || {prize: '-', player: '-'};
-          return `${d.properties.name}\nPrize: ${country.prize}\nPlayer: ${country.player}`;
+          const country = this.countryData.find(el => d.properties.iso3 === el.iso3) || {};
+          const prize = country.prize ? this.$d3.format('$,.2f')(country.prize) : '-';
+          const player = country.player ? country.player : '-';
+          return `${d.properties.name}\nPrize: ${prize}\nPlayer: ${player}`;
         });
 
       const zoomed = () => {
@@ -199,7 +222,6 @@ export default {
         .default(new Date(2015, 5, 4))
         .on('onchange', val => {
           this.currentYear = this.$d3.timeFormat('%Y')(val);
-          // this.$d3.select('p#value-time').text(this.$d3.timeFormat('%Y')(val));
           this.$d3.select('#value-time').attr('value', this.$d3.timeFormat('%Y')(val));
         });
 
@@ -273,7 +295,7 @@ export default {
         .range([0, barWidth]);
 
       const y = this.$d3.scaleBand()
-        .domain(barData.map(el => el.country))
+        .domain(barData.map(el => el.iso3))
         .range([0, barData.length*(barHeight+barMargin)]);
 
       const yAxis = this.$d3.axisRight()
@@ -303,7 +325,7 @@ export default {
           .attr('width', (d) => x(d[this.dataType[elementRef]]))
           .attr('height', barHeight)
           .on('mouseover', (d, i) => {
-            this.$d3.select(`#${d.country.replace(/[. ]/gm, '')}`)
+            this.$d3.select(`#${d.iso3}`)
               .classed('highlighted', true);
           })
           .on('mouseout', (d, i) => {
@@ -316,6 +338,9 @@ export default {
         .attr('x', (d) => x(d[this.dataType[elementRef]]) + 2)
         .attr('y', (d, i) => (barHeight/2) + barMargin)
         .text((d) => axisFormat(d[this.dataType[elementRef]]))
+
+      bar.append('title')
+        .text(d => `${d.country}, ${this.$d3.format('$,.2f')(d[this.dataType[elementRef]])}`);
       
       chart.append('g')
         .classed('x axis', true)

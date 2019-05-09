@@ -30,6 +30,7 @@
           WORLD MAP
         </h3>
         <div class="map w-full" ref="map"></div>
+        <div class="buttons"></div>
         <div class="slider w-full">
           <div hidden><input id="value-time" v-model="currentYear" type="text" /></div>
           <div><div id="slider-time" class="w-full"></div></div>
@@ -306,7 +307,6 @@ export default {
       
       arcs.append('path')
         .attr('fill', (d, i) => color(i))
-        .attr('d', arc)
         .on('mouseover', (d, i) => {
           this.$d3.select(`#${this.continentData[i].continent.replace(' ', '')}`)
             .classed('highlighted', true);
@@ -315,6 +315,15 @@ export default {
           this.$d3.selectAll('.continent')
             .classed('highlighted', false);
         })
+        .transition()
+          .attrTween('d', d => {
+            const i = this.$d3.interpolate(d.startAngle+0.1, d.endAngle);
+            return (t) => {
+              d.endAngle = i(t);
+              return arc(d);
+            }
+          })
+          .delay((d, i) => i*100)
 
       arcs.append('title')
         .text((d, i) => this.continentData[i].continent);
@@ -370,7 +379,7 @@ export default {
       
       bar.append('rect')
           .attr('fill', this.$tw.colors.tertiary)
-          .attr('width', (d) => x(d[this.dataType[elementRef]]))
+          .attr('width', 0)
           .attr('height', barHeight)
           .on('mouseover', (d, i) => {
             this.$d3.select(`#${d.iso3}`)
@@ -379,7 +388,11 @@ export default {
           .on('mouseout', (d, i) => {
             this.$d3.selectAll('.country')
               .classed('highlighted', false);
-          });
+          })
+          .transition()
+            .attr('width', (d) => x(d[this.dataType[elementRef]]))
+            .delay(250)
+            .ease();
 
       bar.append('text')
         .attr('class', 'bar-text')

@@ -95,7 +95,7 @@ export default {
           prize: temp[key].prize, 
           player: temp[key].player
         }
-      })
+      }).filter(el => el.continent);
     }
   },
   watch: {
@@ -244,13 +244,41 @@ export default {
     },
     drawPie: function (elementRef) {
       const title = 'CONTINENTS DISTRIBUTION'
-      const viewHeight = this.parseNumber(this[`${elementRef}View`].style('height'))
+      const viewHeight = this.parseNumber(this[`${elementRef}View`].style('height'));
+      const labelHeight = viewHeight*0.075;
+      const labelWidth = viewHeight*0.1;
       const pieRad = viewHeight * 0.38;
       const center = {
         x: viewHeight * 0.425,
         y: viewHeight * 0.575,
       }
       const color = this.$d3.scaleOrdinal(this.$d3.schemeSet1)
+
+      const labels = this[`${elementRef}Svg`]
+        .append('g')
+          .attr('transform', `translate(${center.x+pieRad+10}, ${center.y-pieRad})`);
+      
+      const label = labels.selectAll('g')
+        .data(this.continentData)
+        .enter()
+          .append('g')
+            .attr('transform', (d, i) => `translate(0, ${i*(labelHeight+2)})`);
+
+      label.append('rect')
+        .attr('fill', (d, i) => color(i))
+        .attr('height', labelHeight)
+        .attr('width', labelWidth);
+
+      label.append('text')
+        .attr('class', 'label-text')
+        .attr('transform', `translate(${labelWidth+4}, ${labelHeight/2+4})`)
+        .text(d => d.continent);
+
+      labels.append('rect')
+        // .attr('x', labelWidth-1)
+        .attr('fill', this.$tw.colors.secondary)
+        .attr('height', (labelHeight+2)*this.continentData.length-2)
+        .attr('width', 2);
 
       const vis = this[`${elementRef}Svg`]
         .data(this.continentData)
@@ -408,6 +436,10 @@ export default {
 
 .pie-title, .bar-title {
   @apply fill-tertiary font-semibold;
+}
+
+.label-text {
+  @apply fill-white text-xs;
 }
 
 .continent {

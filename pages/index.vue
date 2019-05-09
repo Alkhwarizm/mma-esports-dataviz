@@ -113,7 +113,7 @@ export default {
       countries,
       continents,
       currentYear: 2016,
-      currentMapData: 'player',
+      currentMapData: 'prize',
       dataType: {
         'player-dist': 'player',
         'prize-dist': 'prize',
@@ -152,6 +152,10 @@ export default {
       this.drawPrizeDist();
       this.$d3.select('div.player-dist').html(null);
       this.drawPlayerDist();
+      this.$d3.select('div.map').html(null);
+      this.drawMap();
+    },
+    currentMapData: function () {
       this.$d3.select('div.map').html(null);
       this.drawMap();
     }

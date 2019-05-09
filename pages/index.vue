@@ -198,11 +198,15 @@ export default {
       this.drawViewPort('prize-dist', 0.37);
       this.drawPie('prize-dist');
       this.drawBar('prize-dist', this.$d3.formatPrefix('$,.0r', 1e6));
+      this.drawFocusedBar('prize-dist', this.$d3.formatPrefix(',.1', 1e3), 'Asia');
+      this.drawStats('prize-dist',  'Asia');
     },
     drawPlayerDist: function () {
       this.drawViewPort('player-dist', 0.37);
       this.drawPie('player-dist');
       this.drawBar('player-dist', this.$d3.formatPrefix(',.1', 1e3));
+      this.drawFocusedBar('player-dist', this.$d3.formatPrefix(',.1', 1e3), 'Asia');
+      this.drawStats('player-dist',  'Asia');
     },
     drawSlider: function () {
       const sliderWidth = this.parseNumber(this.$d3.select('#slider-time').style('width'));
@@ -368,9 +372,8 @@ export default {
         .filter(filterByContinent)
         .sort((a, b) => b[this.dataType[elementRef]] - a[this.dataType[elementRef]])
         .slice(0, 5);
-      const barMargin = barWidth * 1.2;
 
-      console.log(barData);
+      const barMargin = barWidth * 1.2;
       
       const x = this.$d3.scaleBand()
         .domain(barData.map(el => el.iso3))
@@ -436,6 +439,86 @@ export default {
         .attr('x', barMargin + 2 * (barWidth + 2 * barMargin))
         .attr('y', - 5)
         .text(barData[0][this.dataType[elementRef]])
+    },
+    drawStats: function (elementRef, focusedContinent = 'Asia') {
+      const viewHeight = this.parseNumber(this[`${elementRef}View`].style('height'))
+      const viewWidth = this.parseNumber(this[`${elementRef}View`].style('width'))
+      const posX = viewWidth * 0.65;
+      const posY = viewHeight * 0.125;
+
+      var prefix = '';
+
+      if (elementRef == 'prize-dist') {
+          prefix = '$';
+      }
+
+      const display = this[`${elementRef}Svg`]
+        .append('g')
+        .attr('transform', `translate(${posX}, ${posY})`)
+
+      const displayData = this.countryData
+        .filter(filterByContinent)
+        .sort((a, b) => b[this.dataType[elementRef]] - a[this.dataType[elementRef]])
+    
+      const worldWideTotal = this.countryData.reduce(function (acc, curr) {
+        if (!acc.prize && !acc.player) {
+          acc = {
+            prize: 0,
+            player: 0
+          }
+        }
+        acc.prize += curr.prize ? curr.prize : 0;
+        acc.player += curr.player ? curr.player : 0;
+        return acc;
+      }, {});
+
+      function filterByContinent(item) {
+        return (item.continent == focusedContinent);
+      }
+
+      const continentTotal = displayData.reduce(function (acc, curr) {
+        if (!acc.prize && !acc.player) {
+          acc = {
+            prize: 0,
+            player: 0
+          }
+        }
+
+        acc.prize += curr.prize ? curr.prize : 0;
+        acc.player += curr.player ? curr.player : 0;
+        return acc;
+      }, {});
+
+      const mean = (continentTotal[this.dataType[elementRef]] / displayData.length);
+
+      let lowMiddle = Math.floor((displayData.length - 1) / 2);
+      let highMiddle = Math.ceil((displayData.length - 1) / 2);
+
+      const median = (displayData[lowMiddle][this.dataType[elementRef]] + displayData[highMiddle][this.dataType[elementRef]]) / 2;
+
+      display.append('text')
+        .attr('class', 'bar-text')
+        .attr('x', 0)
+        .attr('y', viewHeight * 0.1)
+        .text('Total    : ' + prefix + this.$d3.format(',.0f')(continentTotal[this.dataType[elementRef]]))
+
+      display.append('text')
+        .attr('class', 'subdisplay-text')
+        .attr('x', 0)
+        .attr('y', viewHeight * 0.15)
+        .text(this.$d3.format(',.1f')(continentTotal[this.dataType[elementRef]] * 100/worldWideTotal[this.dataType[elementRef]]) + '% worldwide')
+
+      display.append('text')
+        .attr('class', 'bar-text')
+        .attr('x', 0)
+        .attr('y', viewHeight * 0.4)
+        .text('Mean     : ' + prefix + this.$d3.format(',.0r')(mean))
+
+      display.append('text')
+        .attr('class', 'bar-text')
+        .attr('x', 0)
+        .attr('y', viewHeight * 0.7)
+        .text('Median   : ' + prefix + this.$d3.format(',.0r')(median))
     }
   },
   mounted() {
@@ -454,6 +537,11 @@ export default {
 
 .bar-text {
   fill: white;
+}
+
+.subdisplay-text{
+  fill: white;
+  font-size: 60%
 }
 
 .dist .axis .domain, .dist .axis .tick line {

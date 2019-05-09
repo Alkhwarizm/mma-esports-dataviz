@@ -795,7 +795,11 @@ module.exports = {
   */
 
   svgFill: {
-    'current': 'currentColor'
+    'current': 'currentColor',
+    'primary': colors.primary,
+    'secondary': colors.secondary,
+    'tertiary': colors.tertiary,
+    'white': colors.white,
   },
 
   /*
@@ -813,7 +817,11 @@ module.exports = {
   */
 
   svgStroke: {
-    'current': 'currentColor'
+    'current': 'currentColor',
+    'primary': colors.primary,
+    'secondary': colors.secondary,
+    'tertiary': colors.tertiary,
+    'white': colors.white,
   },
 
   /*

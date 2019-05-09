@@ -6,7 +6,7 @@
           DASHBOARD
         </h5>
         <h2 class="title">
-          RISE OF ESPORTS
+          RISE OF ESPORTS AROUND THE GLOBE
         </h2>
       </div>
     </div>
@@ -30,9 +30,43 @@
           WORLD MAP
         </h3>
         <div class="map w-full" ref="map"></div>
-        <div class="slider w-full">
+        <div class="slider row w-full">
+          <div class="information padded w-2/5 min-h-full">
+            <h6 class="subtitle">INFORMATION</h6>
+            <h4 class="title"></h4>
+            <h5 class="content prize"></h5>
+            <h5 class="content player">Hover to see additional information</h5>
+            <h5 class="content distribution"></h5>
+            <h5 class="content prize-rank"></h5>
+            <h5 class="content player-rank"></h5>
+          </div>
           <div hidden><input id="value-time" v-model="currentYear" type="text" /></div>
-          <div><div id="slider-time" class="w-full"></div></div>
+          <div class="w-3/5">
+            <div class="row w-full text-center">
+              <div class="w-2/5 padded text-center">
+                <h6 class="subtitle">SELECT DATA:</h6>
+              </div>
+              <div class="w-1/4">
+                <div 
+                  class="button" 
+                  :class="{active: currentMapData === 'prize'}"
+                  @click="changeMapData('prize')"
+                >
+                  PRIZE
+                </div>
+              </div>
+              <div class="w-1/4">
+                <div 
+                  class="button" 
+                  :class="{active: currentMapData === 'player'}"
+                  @click="changeMapData('player')"
+                >
+                  PLAYER
+                </div>
+              </div>
+            </div>
+            <div id="slider-time" class="w-full"></div>
+          </div>
         </div>
       </div>
     </div>
@@ -47,13 +81,27 @@ function parseData(el) {
   return el;
 }
 
+const byPlayer = (a, b) => b.player - a.player;
+const byPrize = (a, b) => b.prize - a.prize;
+const addPrizeRank = (el, i) => {
+  el.prizeRank = i+1;
+  return el;
+}
+const addPlayerRank = (el, i) => {
+  el.playerRank = i+1;
+  return el;
+}
+
 const topojson = require('topojson-client');
 const world = require('../static/topojson/countries.json');
 const wc = require('../static/topojson/world-continents.json');
 const mainData = {
-  '2016': require('../static/data/2016.json').map(parseData),
-  '2017': require('../static/data/2017.json').map(parseData),
-  '2018': require('../static/data/2018.json').map(parseData),
+  '2016': require('../static/data/2016.json')
+    .map(parseData).sort(byPlayer).map(addPlayerRank).sort(byPrize).map(addPrizeRank),
+  '2017': require('../static/data/2017.json')
+    .map(parseData).sort(byPlayer).map(addPlayerRank).sort(byPrize).map(addPrizeRank),
+  '2018': require('../static/data/2018.json')
+    .map(parseData).sort(byPlayer).map(addPlayerRank).sort(byPrize).map(addPrizeRank),
 }
 
 const continents = topojson.feature(wc, wc.objects.continent).features;
@@ -65,7 +113,7 @@ export default {
       countries,
       continents,
       currentYear: 2016,
-      currentMapData: 'player',
+      currentMapData: 'prize',
       dataType: {
         'player-dist': 'player',
         'prize-dist': 'prize',
@@ -95,7 +143,7 @@ export default {
           prize: temp[key].prize, 
           player: temp[key].player
         }
-      })
+      }).filter(el => el.continent);
     }
   },
   watch: {
@@ -106,9 +154,16 @@ export default {
       this.drawPlayerDist();
       this.$d3.select('div.map').html(null);
       this.drawMap();
+    },
+    currentMapData: function () {
+      this.$d3.select('div.map').html(null);
+      this.drawMap();
     }
   },
   methods: {
+    changeMapData: function (dataType) {
+      this.currentMapData = dataType;
+    },
     parseNumber: function (input) {
       const str = input.match(/[0-9]+/g)[0];
       return Number.parseInt(str);
@@ -147,7 +202,7 @@ export default {
 
       const opacity = this.$d3.scaleQuantile()
         .domain(this.countryData.map(el => el[this.currentMapData]))
-        .range([.1, .2, .3, .4, .45, .5, .55, .6, .65, .7, .75, .8, .9, 1.0])
+        .range([.1, .3, .4, .45, .5, .55, .6, .65, .7, .75, .8, 1.0])
 
       const worldMap = this.mapSvg.append('g')
         .selectAll('path')
@@ -158,12 +213,28 @@ export default {
             const country = this.countryData.find(c => c.iso3 === d.properties.iso3) || {};
             return opacity(country[this.currentMapData] ? country[this.currentMapData] : 0);
           })
-          // .attr('stroke', this.$tw.colors.primary)
           .attr('d', path)
           .attr('class', 'country')
           .attr('id', d => d.properties.iso3)
-          // .on("mouseover", this.handleMouseOver)
-          // .on("mouseout", this.handleMouseOut);
+          .on("mouseover", (d, i) => {
+            const country = this.countryData.find(c => c.iso3 === d.properties.iso3) || {};
+            const prize = country.prize ? this.$d3.format('$,.2f')(country.prize) : '-';
+            const player = country.player ? country.player : '-';
+            const prizeRank = country.prize ? country.prizeRank : '-';
+            const playerRank = country.player ? country.playerRank : '-';
+            this.$d3.select('.information .title').text(d.properties.name.toUpperCase());
+            this.$d3.select('.information .content.prize').text(`PRIZE: ${prize}`);
+            this.$d3.select('.information .content.player').text(`PLAYER: ${player}`);
+            this.$d3.select('.information .content.prize-rank').text(`PRIZE RANK: #${prizeRank}`);
+            this.$d3.select('.information .content.player-rank').text(`PLAYER RANK: #${playerRank}`);
+          })
+          .on("mouseout", () => {
+            this.$d3.select('.information .title').text('');
+            this.$d3.select('.information .content.prize').text('');
+            this.$d3.select('.information .content.player').text('Hover to see additional information');
+            this.$d3.select('.information .content.prize-rank').text('');
+            this.$d3.select('.information .content.player-rank').text('');
+          });
       
       const continents = this.mapSvg.append('g')
         .selectAll('path')
@@ -174,17 +245,18 @@ export default {
           .attr('class', 'continent')
           .attr('id', d => d.properties.continent.replace(' ', ''));
 
-      const tooltip = worldMap.append('title')
-        .text(d => {
-          const country = this.countryData.find(el => d.properties.iso3 === el.iso3) || {};
-          const prize = country.prize ? this.$d3.format('$,.2f')(country.prize) : '-';
-          const player = country.player ? country.player : '-';
-          return `${d.properties.name}\nPrize: ${prize}\nPlayer: ${player}`;
-        });
+      // const tooltip = worldMap.append('title')
+      //   .text(d => {
+      //     const country = this.countryData.find(el => d.properties.iso3 === el.iso3) || {};
+      //     const prize = country.prize ? this.$d3.format('$,.2f')(country.prize) : '-';
+      //     const player = country.player ? country.player : '-';
+      //     return `${d.properties.name}\nPrize: ${prize}\nPlayer: ${player}`;
+      //   });
 
       const zoomed = () => {
         worldMap.attr("transform", this.$d3.event.transform);
         continents.attr("transform", this.$d3.event.transform);
+        this.mapTransformState = this.$d3.event.transform;
       }
 
       const zoom = this.$d3.zoom()
@@ -193,6 +265,11 @@ export default {
         .on('zoom', zoomed);
 
       this.mapSvg.call(zoom);
+
+      if (this.mapTransformState) {
+        worldMap.attr("transform", this.mapTransformState);
+        continents.attr("transform", this.mapTransformState);
+      }
     },
     drawPrizeDist: function () {
       this.drawViewPort('prize-dist', 0.37);
@@ -220,7 +297,7 @@ export default {
         .min(this.$d3.min(dataTime))
         .max(this.$d3.max(dataTime))
         .step(1000 * 60 * 60 * 24 *365)
-        .width(sliderWidth*0.5)
+        .width(sliderWidth*0.8)
         .tickFormat(this.$d3.timeFormat('%Y'))
         .tickValues(dataTime)
         .default(new Date(2015, 5, 4))
@@ -235,23 +312,59 @@ export default {
         .attr('width', '100%')
         .attr('height', 100)
         .append('g')
-        .attr('transform', `translate(${sliderWidth*0.45},30)`);
+        .attr('transform', `translate(30,30)`);
 
       gTime.call(sliderTime);
       // this.$d3.select('p#value-time').text(this.$d3.timeFormat('%Y')(sliderTime.value()));
     },
     drawPie: function (elementRef) {
-      const pieRad = this.parseNumber(this[`${elementRef}View`].style('height')) * 0.4;
+      const title = 'CONTINENTS DISTRIBUTION'
+      const viewHeight = this.parseNumber(this[`${elementRef}View`].style('height'));
+      const labelHeight = viewHeight*0.075;
+      const labelWidth = viewHeight*0.1;
+      const pieRad = viewHeight * 0.38;
       const center = {
-        x: this.parseNumber(this[`${elementRef}View`].style('height')) * 0.5,
-        y: this.parseNumber(this[`${elementRef}View`].style('height')) * 0.5,
+        x: viewHeight * 0.425,
+        y: viewHeight * 0.575,
       }
       const color = this.$d3.scaleOrdinal(this.$d3.schemeSet1)
+
+      const labels = this[`${elementRef}Svg`]
+        .append('g')
+          .attr('transform', `translate(${center.x+pieRad+10}, ${center.y-pieRad})`);
+      
+      const label = labels.selectAll('g')
+        .data(this.continentData)
+        .enter()
+          .append('g')
+            .attr('transform', (d, i) => `translate(0, ${i*(labelHeight+2)})`);
+
+      label.append('rect')
+        .attr('fill', (d, i) => color(i))
+        .attr('height', labelHeight)
+        .attr('width', labelWidth);
+
+      label.append('text')
+        .attr('class', 'label-text')
+        .attr('transform', `translate(${labelWidth+4}, ${labelHeight/2+4})`)
+        .text(d => d.continent);
+
+      labels.append('rect')
+        // .attr('x', labelWidth-1)
+        .attr('fill', this.$tw.colors.secondary)
+        .attr('height', (labelHeight+2)*this.continentData.length-2)
+        .attr('width', 2);
 
       const vis = this[`${elementRef}Svg`]
         .data(this.continentData)
         .append('g')
           .attr('transform', `translate(${center.x}, ${center.y})`)
+
+      const pieTitle = this[`${elementRef}Svg`]
+        .append('text')
+          .attr('transform', `translate(${viewHeight*0.05}, ${viewHeight*0.1})`)
+          .attr('class', 'pie-title')
+          .text(title)
 
       const arc = this.$d3.arc()
         .outerRadius(pieRad)
@@ -268,31 +381,51 @@ export default {
       
       arcs.append('path')
         .attr('fill', (d, i) => color(i))
-        .attr('d', arc)
         .on('mouseover', (d, i) => {
+          const prize = this.$d3.format('$,.2f')(this.continentData[i].prize);
+          const player = this.continentData[i].player;
+          const distribution = this.$d3.format('.2%')((d.endAngle - d.startAngle)/(2*Math.PI));
+
           this.$d3.select(`#${this.continentData[i].continent.replace(' ', '')}`)
             .classed('highlighted', true);
+          this.$d3.select('.information .title').text(this.continentData[i].continent.toUpperCase());
+          this.$d3.select('.information .content.prize').text(`PRIZE: ${prize}`);
+          this.$d3.select('.information .content.player').text(`PLAYER: ${player}`);
+          this.$d3.select('.information .content.distribution').text(`DISTRIBUTION: ${distribution}`);
         })
         .on('mouseout', (d, i) => {
           this.$d3.selectAll('.continent')
             .classed('highlighted', false);
+          this.$d3.select('.information .title').text('');
+          this.$d3.select('.information .content.prize').text('');
+          this.$d3.select('.information .content.player').text('Hover to see additional information');
+          this.$d3.select('.information .content.distribution').text('');
         })
+        .transition()
+          .attrTween('d', d => {
+            const i = this.$d3.interpolate(d.startAngle+0.1, d.endAngle);
+            return (t) => {
+              d.endAngle = i(t);
+              return arc(d);
+            }
+          })
+          .delay((d, i) => i*100)
 
       arcs.append('title')
         .text((d, i) => this.continentData[i].continent);
     },
     drawBar: function (elementRef, axisFormat) {
+      const title = 'TOP 5 COUNTRIES';
       const viewHeight = this.parseNumber(this[`${elementRef}View`].style('height'))
       const viewWidth = this.parseNumber(this[`${elementRef}View`].style('width'))
       const barHeight = viewHeight * 0.125;
       const barWidth = viewWidth * 0.35;
       const posX = viewWidth * 0.55;
-      const posY = viewHeight * 0.125;
+      const posY = viewHeight * 0.175;
       const barData = this.countryData
         .sort((a, b) => b[this.dataType[elementRef]] - a[this.dataType[elementRef]])
         .slice(0, 5);
       const barMargin = 5;
-      console.log(barData);
       
       const x = this.$d3.scaleLinear()
         .domain([0, this.$d3.max(barData, (d) => d[this.dataType[elementRef]])])
@@ -316,6 +449,12 @@ export default {
       const chart = this[`${elementRef}Svg`]
         .append('g')
           .attr('transform', `translate(${posX}, ${posY})`)
+
+      const barTitle = this[`${elementRef}Svg`]
+        .append('text')
+          .attr('class', 'bar-title')
+          .attr('transform', `translate(${posX}, ${viewHeight*0.1})`)
+          .text(title);
       
       const bar = chart.selectAll('g')
         .data(barData)
@@ -326,7 +465,7 @@ export default {
       
       bar.append('rect')
           .attr('fill', this.$tw.colors.tertiary)
-          .attr('width', (d) => x(d[this.dataType[elementRef]]))
+          .attr('width', 0)
           .attr('height', barHeight)
           .on('mouseover', (d, i) => {
             this.$d3.select(`#${d.iso3}`)
@@ -335,7 +474,11 @@ export default {
           .on('mouseout', (d, i) => {
             this.$d3.selectAll('.country')
               .classed('highlighted', false);
-          });
+          })
+          .transition()
+            .attr('width', (d) => x(d[this.dataType[elementRef]]))
+            .delay(250)
+            .ease();
 
       bar.append('text')
         .attr('class', 'bar-text')
@@ -531,6 +674,20 @@ export default {
 </script>
 
 <style>
+.button {
+  max-width: 8rem;
+  letter-spacing: 1pt;
+  @apply border border-white border-2 text-white text-xs text-center font-semibold p-2 mt-2 mr-2;
+}
+
+.button:hover {
+  @apply bg-white text-primary;
+}
+
+.button.active {
+  @apply bg-white text-primary;
+}
+
 .bar {
   @apply mb-2;
 }
@@ -545,8 +702,8 @@ export default {
 }
 
 .dist .axis .domain, .dist .axis .tick line {
-  stroke: #64DDDC;
   stroke-width: 2px;
+  @apply stroke-secondary;
 }
 
 .dist .x.axis .tick text {
@@ -559,19 +716,26 @@ export default {
   font-size: 0.5rem;
 }
 
+.pie-title, .bar-title {
+  @apply fill-tertiary font-semibold;
+}
+
+.label-text {
+  @apply fill-white text-xs;
+}
+
 .continent {
   fill: none;
 }
 
 .continent.highlighted {
-  fill: #1f9d55;
-  stroke: #64DDDC;
   stroke-width: 2px;
+  @apply stroke-secondary fill-tertiary;
 }
 
 .country.highlighted {
-  stroke:#64DDDC;
   stroke-width: 2px;
+  @apply stroke-secondary;
 }
 
 .container {
@@ -603,17 +767,16 @@ export default {
   @apply pt-3 pl-3 pb-2 pr-3;
 }
 
-.kv {
+.content {
   font-family: Orbitron;
   letter-spacing: 1pt;
-  @apply text-white mt-1 ml-2;
+  @apply text-white mt-2 mb-1;
 }
 
 g.tick text, g.parameter-value text {
   font-family: Orbitron;
   letter-spacing: 2pt;
-  fill: #1f9d55;
-  @apply text-base font-bold;
+  @apply text-base font-bold fill-tertiary;
 }
 
 g.tick text {
@@ -626,12 +789,11 @@ g.parameter-value text {
 }
 
 .handle {
-  fill: #001A2C;
-  stroke: #1f9d55;
   stroke-width: 2px;
+  @apply fill-primary stroke-tertiary;
 }
 
 line.track, line.track-inset {
-  stroke: #1f9d55;
+  @apply stroke-tertiary;
 }
 </style>

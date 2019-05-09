@@ -36,6 +36,9 @@
             <h4 class="title"></h4>
             <h5 class="content prize"></h5>
             <h5 class="content player">Hover to see additional information</h5>
+            <h5 class="content distribution"></h5>
+            <h5 class="content prize-rank"></h5>
+            <h5 class="content player-rank"></h5>
           </div>
           <div hidden><input id="value-time" v-model="currentYear" type="text" /></div>
           <div class="w-3/5"><div id="slider-time" class="w-full"></div></div>
@@ -53,13 +56,27 @@ function parseData(el) {
   return el;
 }
 
+const byPlayer = (a, b) => b.player - a.player;
+const byPrize = (a, b) => b.prize - a.prize;
+const addPrizeRank = (el, i) => {
+  el.prizeRank = i+1;
+  return el;
+}
+const addPlayerRank = (el, i) => {
+  el.playerRank = i+1;
+  return el;
+}
+
 const topojson = require('topojson-client');
 const world = require('../static/topojson/countries.json');
 const wc = require('../static/topojson/world-continents.json');
 const mainData = {
-  '2016': require('../static/data/2016.json').map(parseData),
-  '2017': require('../static/data/2017.json').map(parseData),
-  '2018': require('../static/data/2018.json').map(parseData),
+  '2016': require('../static/data/2016.json')
+    .map(parseData).sort(byPlayer).map(addPlayerRank).sort(byPrize).map(addPrizeRank),
+  '2017': require('../static/data/2017.json')
+    .map(parseData).sort(byPlayer).map(addPlayerRank).sort(byPrize).map(addPrizeRank),
+  '2018': require('../static/data/2018.json')
+    .map(parseData).sort(byPlayer).map(addPlayerRank).sort(byPrize).map(addPrizeRank),
 }
 
 const continents = topojson.feature(wc, wc.objects.continent).features;
@@ -164,7 +181,6 @@ export default {
             const country = this.countryData.find(c => c.iso3 === d.properties.iso3) || {};
             return opacity(country[this.currentMapData] ? country[this.currentMapData] : 0);
           })
-          // .attr('stroke', this.$tw.colors.primary)
           .attr('d', path)
           .attr('class', 'country')
           .attr('id', d => d.properties.iso3)
@@ -172,14 +188,20 @@ export default {
             const country = this.countryData.find(c => c.iso3 === d.properties.iso3) || {};
             const prize = country.prize ? this.$d3.format('$,.2f')(country.prize) : '-';
             const player = country.player ? country.player : '-';
+            const prizeRank = country.prize ? country.prizeRank : '-';
+            const playerRank = country.player ? country.playerRank : '-';
             this.$d3.select('.information .title').text(d.properties.name.toUpperCase());
             this.$d3.select('.information .content.prize').text(`PRIZE: ${prize}`);
             this.$d3.select('.information .content.player').text(`PLAYER: ${player}`);
+            this.$d3.select('.information .content.prize-rank').text(`PRIZE RANK: #${prizeRank}`);
+            this.$d3.select('.information .content.player-rank').text(`PLAYER RANK: #${playerRank}`);
           })
           .on("mouseout", () => {
             this.$d3.select('.information .title').text('');
             this.$d3.select('.information .content.prize').text('');
             this.$d3.select('.information .content.player').text('Hover to see additional information');
+            this.$d3.select('.information .content.prize-rank').text('');
+            this.$d3.select('.information .content.player-rank').text('');
           });
       
       const continents = this.mapSvg.append('g')
@@ -191,13 +213,13 @@ export default {
           .attr('class', 'continent')
           .attr('id', d => d.properties.continent.replace(' ', ''));
 
-      const tooltip = worldMap.append('title')
-        .text(d => {
-          const country = this.countryData.find(el => d.properties.iso3 === el.iso3) || {};
-          const prize = country.prize ? this.$d3.format('$,.2f')(country.prize) : '-';
-          const player = country.player ? country.player : '-';
-          return `${d.properties.name}\nPrize: ${prize}\nPlayer: ${player}`;
-        });
+      // const tooltip = worldMap.append('title')
+      //   .text(d => {
+      //     const country = this.countryData.find(el => d.properties.iso3 === el.iso3) || {};
+      //     const prize = country.prize ? this.$d3.format('$,.2f')(country.prize) : '-';
+      //     const player = country.player ? country.player : '-';
+      //     return `${d.properties.name}\nPrize: ${prize}\nPlayer: ${player}`;
+      //   });
 
       const zoomed = () => {
         worldMap.attr("transform", this.$d3.event.transform);
@@ -324,12 +346,24 @@ export default {
       arcs.append('path')
         .attr('fill', (d, i) => color(i))
         .on('mouseover', (d, i) => {
+          const prize = this.$d3.format('$,.2f')(this.continentData[i].prize);
+          const player = this.continentData[i].player;
+          const distribution = this.$d3.format('.2%')((d.endAngle - d.startAngle)/(2*Math.PI));
+
           this.$d3.select(`#${this.continentData[i].continent.replace(' ', '')}`)
             .classed('highlighted', true);
+          this.$d3.select('.information .title').text(this.continentData[i].continent.toUpperCase());
+          this.$d3.select('.information .content.prize').text(`PRIZE: ${prize}`);
+          this.$d3.select('.information .content.player').text(`PLAYER: ${player}`);
+          this.$d3.select('.information .content.distribution').text(`DISTRIBUTION: ${distribution}`);
         })
         .on('mouseout', (d, i) => {
           this.$d3.selectAll('.continent')
             .classed('highlighted', false);
+          this.$d3.select('.information .title').text('');
+          this.$d3.select('.information .content.prize').text('');
+          this.$d3.select('.information .content.player').text('Hover to see additional information');
+          this.$d3.select('.information .content.distribution').text('');
         })
         .transition()
           .attrTween('d', d => {

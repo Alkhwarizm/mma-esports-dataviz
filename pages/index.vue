@@ -114,6 +114,7 @@ export default {
       continents,
       currentYear: 2016,
       currentMapData: 'prize',
+      currentFocusedContinent: '',
       dataType: {
         'player-dist': 'player',
         'prize-dist': 'prize',
@@ -158,7 +159,15 @@ export default {
     currentMapData: function () {
       this.$d3.select('div.map').html(null);
       this.drawMap();
-    }
+    },
+    currentFocusedContinent: function () {
+      this.$d3.select('div.prize-dist').html(null);
+      this.drawPrizeDist();
+      this.$d3.select('div.player-dist').html(null);
+      this.drawPlayerDist();
+      this.$d3.select('div.map').html(null);
+      this.drawMap();
+    },
   },
   methods: {
     changeMapData: function (dataType) {
@@ -273,17 +282,24 @@ export default {
     },
     drawPrizeDist: function () {
       this.drawViewPort('prize-dist', 0.37);
-      this.drawPie('prize-dist');
-      this.drawBar('prize-dist', this.$d3.formatPrefix('$,.0r', 1e6));
-      this.drawFocusedBar('prize-dist', this.$d3.formatPrefix(',.1', 1e3), 'Asia');
-      this.drawStats('prize-dist',  'Asia');
+      if (this.currentFocusedContinent != ''){
+        this.drawFocusedBar('prize-dist', this.$d3.formatPrefix(',.1', 1e3), this.currentFocusedContinent);
+        this.drawStats('prize-dist',  this.currentFocusedContinent);
+      } else {
+        this.drawPie('prize-dist');
+        this.drawBar('prize-dist', this.$d3.formatPrefix('$,.0r', 1e6));
+      }
     },
     drawPlayerDist: function () {
       this.drawViewPort('player-dist', 0.37);
-      this.drawPie('player-dist');
-      this.drawBar('player-dist', this.$d3.formatPrefix(',.1', 1e3));
-      this.drawFocusedBar('player-dist', this.$d3.formatPrefix(',.1', 1e3), 'Asia');
-      this.drawStats('player-dist',  'Asia');
+      if (this.currentFocusedContinent != '') {
+        this.drawFocusedBar('player-dist', this.$d3.formatPrefix(',.1', 1e3), this.currentFocusedContinent);
+        this.drawStats('player-dist',  this.currentFocusedContinent);       
+      } else {
+        this.drawPie('player-dist');
+        this.drawBar('player-dist', this.$d3.formatPrefix(',.1', 1e3));
+        
+      }
     },
     drawSlider: function () {
       const sliderWidth = this.parseNumber(this.$d3.select('#slider-time').style('width'));
@@ -394,12 +410,20 @@ export default {
           this.$d3.select('.information .content.distribution').text(`DISTRIBUTION: ${distribution}`);
         })
         .on('mouseout', (d, i) => {
-          this.$d3.selectAll('.continent')
-            .classed('highlighted', false);
+          if (this.currentFocusedContinent == ''){
+            this.$d3.selectAll('.continent')
+              .classed('highlighted', false);
+          }
+          
           this.$d3.select('.information .title').text('');
           this.$d3.select('.information .content.prize').text('');
           this.$d3.select('.information .content.player').text('Hover to see additional information');
           this.$d3.select('.information .content.distribution').text('');
+        })
+        .on('click', (d, i) => {
+          this.currentFocusedContinent = this.continentData[i].continent;
+          this.$d3.select(`#${this.continentData[i].continent.replace(' ', '')}`)
+            .classed('highlighted', true);
         })
         .transition()
           .attrTween('d', d => {
@@ -500,6 +524,13 @@ export default {
         .call(yAxis);
     },
     drawFocusedBar: function (elementRef, axisFormat = '', focusedContinent = 'North America') {
+      var prefix = '';
+
+      if (elementRef == 'prize-dist') {
+          prefix = '$';
+      }
+
+      const title = 'TOP 5 ' + focusedContinent.toUpperCase() + ' COUNTRIES';
       const viewHeight = this.parseNumber(this[`${elementRef}View`].style('height'))
       const viewWidth = this.parseNumber(this[`${elementRef}View`].style('width'))
       const barHeight = viewHeight * 0.7;
@@ -533,6 +564,12 @@ export default {
       const chart = this[`${elementRef}Svg`]
         .append('g')
           .attr('transform', `translate(${posX}, ${posY})`)
+
+      const barTitle = this[`${elementRef}Svg`]
+        .append('text')
+          .attr('class', 'bar-title')
+          .attr('transform', `translate(${posX}, ${viewHeight*0.1})`)
+          .text(title);
       
       const bar = chart.selectAll('g')
         .data(barData)
@@ -545,7 +582,6 @@ export default {
           .attr('x', (d, i) => i*(barWidth+ 2 * barMargin) + barMargin)
           .attr('y', (d) => barHeight - y(d[this.dataType[elementRef]]))
           .attr('width', barWidth)
-          .attr('height', (d) =>  y(d[this.dataType[elementRef]]))
           //TODO: tambah mouseover ke axes, ada data yang sangat kecil e.g. North America
           .on('mouseover', (d, i) => {
             this.$d3.select(`#${d.iso3}`)
@@ -554,7 +590,11 @@ export default {
           .on('mouseout', (d, i) => {
             this.$d3.selectAll('.country')
               .classed('highlighted', false);
-          });
+          })
+          .transition()
+            .attr('height', (d) =>  y(d[this.dataType[elementRef]]))
+            .delay(250)
+            .ease();;
 
       if (elementRef == 'player-dist'){
           bar.append('title')
@@ -580,10 +620,11 @@ export default {
       chart.append('text')
         .attr('class', 'bar-text')
         .attr('x', barMargin + 2 * (barWidth + 2 * barMargin))
-        .attr('y', - 5)
-        .text(barData[0][this.dataType[elementRef]])
+        .attr('y', barMargin * 0.5)
+        .text(prefix + this.$d3.format(',.1f')(barData[0][this.dataType[elementRef]]))
     },
     drawStats: function (elementRef, focusedContinent = 'Asia') {
+      const title = focusedContinent.toUpperCase() + ' STATISTICS'
       const viewHeight = this.parseNumber(this[`${elementRef}View`].style('height'))
       const viewWidth = this.parseNumber(this[`${elementRef}View`].style('width'))
       const posX = viewWidth * 0.65;
@@ -598,6 +639,13 @@ export default {
       const display = this[`${elementRef}Svg`]
         .append('g')
         .attr('transform', `translate(${posX}, ${posY})`)
+
+      const statTitle = this[`${elementRef}Svg`]
+        .append('text')
+          .attr('transform', `translate(${viewHeight*0.05}, ${viewHeight*0.1})`)
+          .attr('transform', `translate(${posX}, ${posY})`)
+          .attr('class', 'pie-title')
+          .text(title)
 
       const displayData = this.countryData
         .filter(filterByContinent)
@@ -662,6 +710,30 @@ export default {
         .attr('x', 0)
         .attr('y', viewHeight * 0.7)
         .text('Median   : ' + prefix + this.$d3.format(',.0r')(median))
+
+      if (elementRef == 'prize-dist') {
+        const backButton = display.append('polyline')
+          .style('stroke', this.$tw.colors.secondary)
+          .style('fill', 'none')
+          .style('stroke-width', 5)
+          .attr('points', '12,0 0,12 12,24')
+          .attr('transform', `translate(${viewWidth * 0.3}, -${viewHeight * 0.075})`)
+          .on('click', () => {
+            this.currentFocusedContinent = '';
+            this.$d3.selectAll('.continent')
+              .classed('highlighted', false);
+          })
+          //event still buggy
+          .on('mouseover', () => {
+            this.$d3.select(backButton).style('stroke', this.$tw.colors.tertiary)
+          })
+          .on('mouseout', () => {
+            this.$d3.select(backButton).style('stroke', this.$tw.colors.secondary)
+          })
+          .append('title')
+              .text('Go Back to Overview')
+          
+      }    
     }
   },
   mounted() {

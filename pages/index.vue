@@ -114,6 +114,7 @@ export default {
       continents,
       currentYear: 2016,
       currentMapData: 'prize',
+      currentFocusedContinent: '',
       dataType: {
         'player-dist': 'player',
         'prize-dist': 'prize',
@@ -158,7 +159,15 @@ export default {
     currentMapData: function () {
       this.$d3.select('div.map').html(null);
       this.drawMap();
-    }
+    },
+    currentFocusedContinent: function () {
+      this.$d3.select('div.prize-dist').html(null);
+      this.drawPrizeDist();
+      this.$d3.select('div.player-dist').html(null);
+      this.drawPlayerDist();
+      this.$d3.select('div.map').html(null);
+      this.drawMap();
+    },
   },
   methods: {
     changeMapData: function (dataType) {
@@ -273,13 +282,24 @@ export default {
     },
     drawPrizeDist: function () {
       this.drawViewPort('prize-dist', 0.37);
-      this.drawPie('prize-dist');
-      this.drawBar('prize-dist', this.$d3.formatPrefix('$,.0r', 1e6));
+      if (this.currentFocusedContinent != ''){
+        this.drawFocusedBar('prize-dist', this.$d3.formatPrefix(',.1', 1e3), this.currentFocusedContinent);
+        this.drawStats('prize-dist',  this.currentFocusedContinent);
+      } else {
+        this.drawPie('prize-dist');
+        this.drawBar('prize-dist', this.$d3.formatPrefix('$,.0r', 1e6));
+      }
     },
     drawPlayerDist: function () {
       this.drawViewPort('player-dist', 0.37);
-      this.drawPie('player-dist');
-      this.drawBar('player-dist', this.$d3.formatPrefix(',.1', 1e3));
+      if (this.currentFocusedContinent != '') {
+        this.drawFocusedBar('player-dist', this.$d3.formatPrefix(',.1', 1e3), this.currentFocusedContinent);
+        this.drawStats('player-dist',  this.currentFocusedContinent);       
+      } else {
+        this.drawPie('player-dist');
+        this.drawBar('player-dist', this.$d3.formatPrefix(',.1', 1e3));
+        
+      }
     },
     drawSlider: function () {
       const sliderWidth = this.parseNumber(this.$d3.select('#slider-time').style('width'));
@@ -390,12 +410,20 @@ export default {
           this.$d3.select('.information .content.distribution').text(`DISTRIBUTION: ${distribution}`);
         })
         .on('mouseout', (d, i) => {
-          this.$d3.selectAll('.continent')
-            .classed('highlighted', false);
+          if (this.currentFocusedContinent == ''){
+            this.$d3.selectAll('.continent')
+              .classed('highlighted', false);
+          }
+          
           this.$d3.select('.information .title').text('');
           this.$d3.select('.information .content.prize').text('');
           this.$d3.select('.information .content.player').text('Hover to see additional information');
           this.$d3.select('.information .content.distribution').text('');
+        })
+        .on('click', (d, i) => {
+          this.currentFocusedContinent = this.continentData[i].continent;
+          this.$d3.select(`#${this.continentData[i].continent.replace(' ', '')}`)
+            .classed('highlighted', true);
         })
         .transition()
           .attrTween('d', d => {
@@ -494,6 +522,218 @@ export default {
         .classed('y axis', true)
         .attr('transform', 'translate(0, -1)')
         .call(yAxis);
+    },
+    drawFocusedBar: function (elementRef, axisFormat = '', focusedContinent = 'North America') {
+      var prefix = '';
+
+      if (elementRef == 'prize-dist') {
+          prefix = '$';
+      }
+
+      const title = 'TOP 5 ' + focusedContinent.toUpperCase() + ' COUNTRIES';
+      const viewHeight = this.parseNumber(this[`${elementRef}View`].style('height'))
+      const viewWidth = this.parseNumber(this[`${elementRef}View`].style('width'))
+      const barHeight = viewHeight * 0.7;
+      const barWidth = viewWidth * 0.030;
+      const posX = viewWidth * 0.05;
+      const posY = viewHeight * 0.125;
+
+      function filterByContinent(item) {
+        return (item.continent == focusedContinent);
+      }
+
+      const barData = this.countryData
+        .filter(filterByContinent)
+        .sort((a, b) => b[this.dataType[elementRef]] - a[this.dataType[elementRef]])
+        .slice(0, 5);
+
+      const barMargin = barWidth * 1.2;
+      
+      const x = this.$d3.scaleBand()
+        .domain(barData.map(el => el.iso3))
+        .range([0, barData.length*(barWidth + 2 * barMargin)]);;
+
+      const y = this.$d3.scaleLinear()
+        .domain([0, this.$d3.max(barData, (d) => d[this.dataType[elementRef]])])
+        .range([0, barHeight]);
+
+      const bottomAxis = this.$d3.axisBottom()
+        .scale(x)
+        .tickSize(0)
+
+      const chart = this[`${elementRef}Svg`]
+        .append('g')
+          .attr('transform', `translate(${posX}, ${posY})`)
+
+      const barTitle = this[`${elementRef}Svg`]
+        .append('text')
+          .attr('class', 'bar-title')
+          .attr('transform', `translate(${posX}, ${viewHeight*0.1})`)
+          .text(title);
+      
+      const bar = chart.selectAll('g')
+        .data(barData)
+        .enter()
+        .append('g')
+          .classed('bar', true)
+      
+      bar.append('rect')
+          .attr('fill', this.$tw.colors.tertiary)
+          .attr('x', (d, i) => i*(barWidth+ 2 * barMargin) + barMargin)
+          .attr('y', (d) => barHeight - y(d[this.dataType[elementRef]]))
+          .attr('width', barWidth)
+          //TODO: tambah mouseover ke axes, ada data yang sangat kecil e.g. North America
+          .on('mouseover', (d, i) => {
+            this.$d3.select(`#${d.iso3}`)
+              .classed('highlighted', true);
+          })
+          .on('mouseout', (d, i) => {
+            this.$d3.selectAll('.country')
+              .classed('highlighted', false);
+          })
+          .transition()
+            .attr('height', (d) =>  y(d[this.dataType[elementRef]]))
+            .delay(250)
+            .ease();;
+
+      if (elementRef == 'player-dist'){
+          bar.append('title')
+              .text(d => `${d.country}, ${(d[this.dataType[elementRef]])} players`);
+      } else if (elementRef == 'prize-dist') {
+          bar.append('title')
+              .text(d => `${d.country}, ${this.$d3.format('$,.2f')(d[this.dataType[elementRef]])}`);
+      }
+      
+      
+      chart.append('g')
+        .classed('x axis', true)
+        .attr('transform', `translate(0, ${barHeight})`)
+        .call(bottomAxis);
+      
+      chart.append('line')
+        .style('stroke', this.$tw.colors.secondary)
+        .attr('x1', barMargin)
+        .attr('y1', 0)
+        .attr('x2', barMargin + 2.5 * (barWidth + 2 * barMargin))
+        .attr('y2', 0)
+
+      chart.append('text')
+        .attr('class', 'bar-text')
+        .attr('x', barMargin + 2 * (barWidth + 2 * barMargin))
+        .attr('y', barMargin * 0.5)
+        .text(prefix + this.$d3.format(',.1f')(barData[0][this.dataType[elementRef]]))
+    },
+    drawStats: function (elementRef, focusedContinent = 'Asia') {
+      const title = focusedContinent.toUpperCase() + ' STATISTICS'
+      const viewHeight = this.parseNumber(this[`${elementRef}View`].style('height'))
+      const viewWidth = this.parseNumber(this[`${elementRef}View`].style('width'))
+      const posX = viewWidth * 0.65;
+      const posY = viewHeight * 0.125;
+
+      var prefix = '';
+
+      if (elementRef == 'prize-dist') {
+          prefix = '$';
+      }
+
+      const display = this[`${elementRef}Svg`]
+        .append('g')
+        .attr('transform', `translate(${posX}, ${posY})`)
+
+      const statTitle = this[`${elementRef}Svg`]
+        .append('text')
+          .attr('transform', `translate(${viewHeight*0.05}, ${viewHeight*0.1})`)
+          .attr('transform', `translate(${posX}, ${posY})`)
+          .attr('class', 'pie-title')
+          .text(title)
+
+      const displayData = this.countryData
+        .filter(filterByContinent)
+        .sort((a, b) => b[this.dataType[elementRef]] - a[this.dataType[elementRef]])
+    
+      const worldWideTotal = this.countryData.reduce(function (acc, curr) {
+        if (!acc.prize && !acc.player) {
+          acc = {
+            prize: 0,
+            player: 0
+          }
+        }
+        acc.prize += curr.prize ? curr.prize : 0;
+        acc.player += curr.player ? curr.player : 0;
+        return acc;
+      }, {});
+
+      function filterByContinent(item) {
+        return (item.continent == focusedContinent);
+      }
+
+      const continentTotal = displayData.reduce(function (acc, curr) {
+        if (!acc.prize && !acc.player) {
+          acc = {
+            prize: 0,
+            player: 0
+          }
+        }
+
+        acc.prize += curr.prize ? curr.prize : 0;
+        acc.player += curr.player ? curr.player : 0;
+        return acc;
+      }, {});
+
+      const mean = (continentTotal[this.dataType[elementRef]] / displayData.length);
+
+      let lowMiddle = Math.floor((displayData.length - 1) / 2);
+      let highMiddle = Math.ceil((displayData.length - 1) / 2);
+
+      const median = (displayData[lowMiddle][this.dataType[elementRef]] + displayData[highMiddle][this.dataType[elementRef]]) / 2;
+
+      display.append('text')
+        .attr('class', 'bar-text')
+        .attr('x', 0)
+        .attr('y', viewHeight * 0.1)
+        .text('Total    : ' + prefix + this.$d3.format(',.0f')(continentTotal[this.dataType[elementRef]]))
+
+      display.append('text')
+        .attr('class', 'subdisplay-text')
+        .attr('x', 0)
+        .attr('y', viewHeight * 0.15)
+        .text(this.$d3.format(',.1f')(continentTotal[this.dataType[elementRef]] * 100/worldWideTotal[this.dataType[elementRef]]) + '% worldwide')
+
+      display.append('text')
+        .attr('class', 'bar-text')
+        .attr('x', 0)
+        .attr('y', viewHeight * 0.4)
+        .text('Mean     : ' + prefix + this.$d3.format(',.0r')(mean))
+
+      display.append('text')
+        .attr('class', 'bar-text')
+        .attr('x', 0)
+        .attr('y', viewHeight * 0.7)
+        .text('Median   : ' + prefix + this.$d3.format(',.0r')(median))
+
+      if (elementRef == 'prize-dist') {
+        const backButton = display.append('polyline')
+          .style('stroke', this.$tw.colors.secondary)
+          .style('fill', 'none')
+          .style('stroke-width', 5)
+          .attr('points', '12,0 0,12 12,24')
+          .attr('transform', `translate(${viewWidth * 0.3}, -${viewHeight * 0.075})`)
+          .on('click', () => {
+            this.currentFocusedContinent = '';
+            this.$d3.selectAll('.continent')
+              .classed('highlighted', false);
+          })
+          //event still buggy
+          .on('mouseover', () => {
+            this.$d3.select(backButton).style('stroke', this.$tw.colors.tertiary)
+          })
+          .on('mouseout', () => {
+            this.$d3.select(backButton).style('stroke', this.$tw.colors.secondary)
+          })
+          .append('title')
+              .text('Go Back to Overview')
+          
+      }    
     }
   },
   mounted() {
@@ -526,6 +766,11 @@ export default {
 
 .bar-text {
   fill: white;
+}
+
+.subdisplay-text{
+  fill: white;
+  font-size: 60%
 }
 
 .dist .axis .domain, .dist .axis .tick line {

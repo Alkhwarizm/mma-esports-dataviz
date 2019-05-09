@@ -30,10 +30,15 @@
           WORLD MAP
         </h3>
         <div class="map w-full" ref="map"></div>
-        <div class="buttons"></div>
-        <div class="slider w-full">
+        <div class="slider row w-full">
+          <div class="information padded w-2/5 min-h-full">
+            <h6 class="subtitle">INFORMATION</h6>
+            <h4 class="title"></h4>
+            <h5 class="content prize"></h5>
+            <h5 class="content player">Hover to see additional information</h5>
+          </div>
           <div hidden><input id="value-time" v-model="currentYear" type="text" /></div>
-          <div><div id="slider-time" class="w-full"></div></div>
+          <div class="w-3/5"><div id="slider-time" class="w-full"></div></div>
         </div>
       </div>
     </div>
@@ -163,8 +168,19 @@ export default {
           .attr('d', path)
           .attr('class', 'country')
           .attr('id', d => d.properties.iso3)
-          // .on("mouseover", this.handleMouseOver)
-          // .on("mouseout", this.handleMouseOut);
+          .on("mouseover", (d, i) => {
+            const country = this.countryData.find(c => c.iso3 === d.properties.iso3) || {};
+            const prize = country.prize ? this.$d3.format('$,.2f')(country.prize) : '-';
+            const player = country.player ? country.player : '-';
+            this.$d3.select('.information .title').text(d.properties.name.toUpperCase());
+            this.$d3.select('.information .content.prize').text(`PRIZE: ${prize}`);
+            this.$d3.select('.information .content.player').text(`PLAYER: ${player}`);
+          })
+          .on("mouseout", () => {
+            this.$d3.select('.information .title').text('');
+            this.$d3.select('.information .content.prize').text('');
+            this.$d3.select('.information .content.player').text('Hover to see additional information');
+          });
       
       const continents = this.mapSvg.append('g')
         .selectAll('path')
@@ -223,7 +239,7 @@ export default {
         .min(this.$d3.min(dataTime))
         .max(this.$d3.max(dataTime))
         .step(1000 * 60 * 60 * 24 *365)
-        .width(sliderWidth*0.5)
+        .width(sliderWidth*0.8)
         .tickFormat(this.$d3.timeFormat('%Y'))
         .tickValues(dataTime)
         .default(new Date(2015, 5, 4))
@@ -238,7 +254,7 @@ export default {
         .attr('width', '100%')
         .attr('height', 100)
         .append('g')
-        .attr('transform', `translate(${sliderWidth*0.45},30)`);
+        .attr('transform', `translate(30,30)`);
 
       gTime.call(sliderTime);
       // this.$d3.select('p#value-time').text(this.$d3.timeFormat('%Y')(sliderTime.value()));
@@ -498,10 +514,10 @@ export default {
   @apply pt-3 pl-3 pb-2 pr-3;
 }
 
-.kv {
+.content {
   font-family: Orbitron;
   letter-spacing: 1pt;
-  @apply text-white mt-1 ml-2;
+  @apply text-white mt-2 mb-1;
 }
 
 g.tick text, g.parameter-value text {

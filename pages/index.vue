@@ -6,7 +6,7 @@
           DASHBOARD
         </h5>
         <h2 class="title">
-          RISE OF ESPORTS
+          RISE OF ESPORTS AROUND THE GLOBE
         </h2>
       </div>
     </div>

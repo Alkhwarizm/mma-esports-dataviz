@@ -41,7 +41,32 @@
             <h5 class="content player-rank"></h5>
           </div>
           <div hidden><input id="value-time" v-model="currentYear" type="text" /></div>
-          <div class="w-3/5"><div id="slider-time" class="w-full"></div></div>
+          <div class="w-3/5">
+            <div class="row w-full text-center">
+              <div class="w-2/5 padded text-center">
+                <h6 class="subtitle">SELECT DATA:</h6>
+              </div>
+              <div class="w-1/4">
+                <div 
+                  class="button" 
+                  :class="{active: currentMapData === 'prize'}"
+                  @click="changeMapData('prize')"
+                >
+                  PRIZE
+                </div>
+              </div>
+              <div class="w-1/4">
+                <div 
+                  class="button" 
+                  :class="{active: currentMapData === 'player'}"
+                  @click="changeMapData('player')"
+                >
+                  PLAYER
+                </div>
+              </div>
+            </div>
+            <div id="slider-time" class="w-full"></div>
+          </div>
         </div>
       </div>
     </div>
@@ -132,6 +157,9 @@ export default {
     }
   },
   methods: {
+    changeMapData: function (dataType) {
+      this.currentMapData = dataType;
+    },
     parseNumber: function (input) {
       const str = input.match(/[0-9]+/g)[0];
       return Number.parseInt(str);
@@ -474,6 +502,20 @@ export default {
 </script>
 
 <style>
+.button {
+  max-width: 8rem;
+  letter-spacing: 1pt;
+  @apply border border-white border-2 text-white text-xs text-center font-semibold p-2 mt-2 mr-2;
+}
+
+.button:hover {
+  @apply bg-white text-primary;
+}
+
+.button.active {
+  @apply bg-white text-primary;
+}
+
 .bar {
   @apply mb-2;
 }

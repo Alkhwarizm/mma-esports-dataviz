@@ -118,7 +118,19 @@ export default {
       dataType: {
         'player-dist': 'player',
         'prize-dist': 'prize',
-      }
+      },
+      prizeOpacity: this.$d3.scaleQuantile()
+        .domain(
+          [...mainData['2016'], ...mainData['2017'], ...mainData['2018']]
+            .map(el => el.prize)
+        )
+        .range([.1, .3, .4, .45, .5, .55, .6, .65, .7, .75, .8, 1.0]),
+      playerOpacity: this.$d3.scaleQuantile()
+        .domain(
+          [...mainData['2016'], ...mainData['2017'], ...mainData['2018']]
+            .map(el => el.player)
+        )
+        .range([.1, .3, .4, .45, .5, .55, .6, .65, .7, .75, .8, 1.0]),
     }
   },
   computed: {
@@ -205,13 +217,7 @@ export default {
 
       const path = this.$d3.geoPath(projection);
 
-      // const color = this.$d3.scaleQuantile()
-      //   .domain(this.countryData.map(el => el[this.currentMapData]))
-      //   .range(this.$d3.schemeGreens[9]);
-
-      const opacity = this.$d3.scaleQuantile()
-        .domain(this.countryData.map(el => el[this.currentMapData]))
-        .range([.1, .3, .4, .45, .5, .55, .6, .65, .7, .75, .8, 1.0])
+      const opacity = this[`${this.currentMapData}Opacity`];
 
       const worldMap = this.mapSvg.append('g')
         .selectAll('path')
@@ -220,7 +226,7 @@ export default {
           .attr('fill', this.$tw.colors.tertiary)
           .attr('opacity', d => {
             const country = this.countryData.find(c => c.iso3 === d.properties.iso3) || {};
-            return opacity(country[this.currentMapData] ? country[this.currentMapData] : 0);
+            return country[this.currentMapData] ? opacity(country[this.currentMapData]) : 0.05;
           })
           .attr('d', path)
           .attr('class', 'country')
